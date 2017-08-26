@@ -626,8 +626,8 @@ const PCHAR CGame::GetWeaponName(int iWeaponID)
 		case WEAPON_SPRAYCAN: 			return "Spray Can";
 		case WEAPON_FIREEXTINGUISHER: 	return "Fire Extinguisher";
 		case WEAPON_CAMERA:				return "Camera";
-		case WEAPON_NIGHTVISION:		return "Night Vision";
-		case WEAPON_INFRARED:			return "Thermal Vision";
+		case WEAPON_NIGHTVISION:		return "Night Vision Goggles";
+		case WEAPON_INFRARED:			return "Thermal Vision Goggles";
 		case WEAPON_PARACHUTE:			return "Parachute";
 		case WEAPON_ARMOUR:				return "Armour";
 		case WEAPON_VEHICLE:			return "Vehicle";
