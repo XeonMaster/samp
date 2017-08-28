@@ -89,7 +89,6 @@ public:
 	void	SetHornState(BYTE byteState);
 	BOOL	HasADriver();
 	BOOL	VerifyInstance();
-	void	OnStream(BOOL bStreamIn);
 
 	VEHICLE_TYPE	*m_pVehicle;
 	BOOL		m_bIsInvulnerable;
@@ -100,7 +99,6 @@ public:
 	DWORD		m_dwTimeSinceLastDriven;
 	BOOL		m_bHasBeenDriven;
 	BOOL		m_bShowMarker;
-	BOOL		m_bStreamedIn;
 
 	CVehicle*   m_pTrailer;
 };

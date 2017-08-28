@@ -19,6 +19,7 @@ private:
 	BOOL m_bVehicleSlotState[MAX_VEHICLES];
 	CVehicle *m_pVehicles[MAX_VEHICLES];
 	BYTE m_byteVirtualWorld[MAX_VEHICLES];
+	VEHICLEID		m_iVehiclePoolCount;
 
 public:
 	CVehiclePool();
@@ -53,6 +54,9 @@ public:
 		return m_byteVirtualWorld[VehicleID];		
 	};
 
+	VEHICLEID GetVehiclePoolCount() {
+		return m_iVehiclePoolCount;
+	}
 };
 
 //----------------------------------------------------

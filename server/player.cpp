@@ -90,6 +90,9 @@ CPlayer::CPlayer()
 		m_byteSlotWeapon[i] = 0;
 		m_dwSlotAmmo[i] = 0;
 	}
+	
+	memset(m_bStreamedPlayers, 0, sizeof(m_bStreamedPlayers));
+	memset(m_bStreamedVehicles, 0, sizeof(m_bStreamedVehicles));
 }
 
 //----------------------------------------------------
@@ -161,6 +164,43 @@ void CPlayer::UpdatePosition(float x, float y, float z)
 				pNetGame->GetFilterScripts()->OnPlayerLeaveRaceCheckpoint((cell)m_bytePlayerID);
 				CGameMode *pGameMode = pNetGame->GetGameMode();
 				if(pGameMode) pGameMode->OnPlayerLeaveRaceCheckpoint((cell)m_bytePlayerID);
+			}
+		}
+	}
+
+	CGameMode *pGameMode = pNetGame->GetGameMode();
+	CFilterScripts *pFilters = pNetGame->GetFilterScripts();
+
+	for (BYTE i = 0; i <= pNetGame->GetPlayerPool()->GetPlayerPoolCount(); i++) {
+		if (pNetGame->GetPlayerPool()->GetSlotState(i) && i != m_bytePlayerID) {
+			CPlayer *pPlayer = pNetGame->GetPlayerPool()->GetAt(i);
+			float distance = GetDistanceFromPoint(pPlayer->m_vecPos);
+			if (distance < LOCKING_DISTANCE && !m_bStreamedPlayers[i]) { // Stream In
+				if (pGameMode) pGameMode->OnPlayerStreamIn(i, m_bytePlayerID);
+				if (pFilters) pFilters->OnPlayerStreamIn(i, m_bytePlayerID);
+				m_bStreamedPlayers[i] = TRUE;
+			}
+			else if (distance > LOCKING_DISTANCE && m_bStreamedPlayers[i]) { // Stream Out
+				if (pGameMode) pGameMode->OnPlayerStreamOut(i, m_bytePlayerID);
+				if (pFilters) pFilters->OnPlayerStreamOut(i, m_bytePlayerID);
+				m_bStreamedPlayers[i] = FALSE;
+			}
+		}
+	}
+
+	for (VEHICLEID i = 0; i <= pNetGame->GetVehiclePool()->GetVehiclePoolCount(); i++) {
+		if (pNetGame->GetVehiclePool()->GetSlotState(i)) {
+			CVehicle *pVehicle = pNetGame->GetVehiclePool()->GetAt(i);
+			float distance = GetDistanceFromPoint(pVehicle->m_matWorld.pos);
+			if (distance < LOCKING_DISTANCE && !m_bStreamedVehicles[i]) { // Stream In
+				if (pGameMode) pGameMode->OnVehicleStreamIn(i, m_bytePlayerID);
+				if (pFilters) pFilters->OnVehicleStreamIn(i, m_bytePlayerID);
+				m_bStreamedVehicles[i] = TRUE;
+			}
+			else if (distance > LOCKING_DISTANCE && m_bStreamedVehicles[i]) { // Stream Out
+				if (pGameMode) pGameMode->OnVehicleStreamOut(i, m_bytePlayerID);
+				if (pFilters) pFilters->OnVehicleStreamOut(i, m_bytePlayerID);
+				m_bStreamedVehicles[i] = FALSE;
 			}
 		}
 	}
@@ -1110,6 +1150,30 @@ void CPlayer::CheckKeyUpdatesForScript(WORD wKeys)
 		}
 		m_wLastKeys = wKeys;
 	}
+}
+
+//----------------------------------------------------
+
+int CPlayer::IsInRangeOfPoint(VECTOR vecPos, float fRange) {
+	fRange = fRange * fRange; // we'll use the squared distance, not the square root.    
+
+	float fSX = (m_vecPos.X - vecPos.X) * (m_vecPos.X - vecPos.X);
+	float fSY = (m_vecPos.Y - vecPos.Y) * (m_vecPos.Y - vecPos.Y);
+	float fSZ = (m_vecPos.Z - vecPos.Z) * (m_vecPos.Z - vecPos.Z);
+
+	if ((float)(fSX + fSY + fSZ) < fRange) return 1;
+	
+	return 0;
+}
+
+//----------------------------------------------------
+
+float CPlayer::GetDistanceFromPoint(VECTOR vecPos) {
+	float fSX = (m_vecPos.X - vecPos.X) * (m_vecPos.X - vecPos.X);
+	float fSY = (m_vecPos.Y - vecPos.Y) * (m_vecPos.Y - vecPos.Y);
+	float fSZ = (m_vecPos.Z - vecPos.Z) * (m_vecPos.Z - vecPos.Z);
+
+	return (float)sqrt(fSX + fSY + fSZ);
 }
 
 //----------------------------------------------------

@@ -50,6 +50,8 @@ native GetVehicleTrailer(vehicleid);
 native SetVehicleNumberPlate(vehicleid, numberplate[]);
 native GetVehicleModel(vehicleid);
 native GetVehicleWeaponRotation(vehicleid, &Float:fX, &Float:fY);
+native IsVehicleStreamedInForPlayer(vehicleid, forplayerid);
+native GetVehiclePoolSize();
 
 // Virtual Worlds
 native SetVehicleVirtualWorld(vehicleid, worldid);

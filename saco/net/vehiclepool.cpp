@@ -290,12 +290,9 @@ void CVehiclePool::Process()
 						pTrailer->TeleportTo(matPos.pos.X, matPos.pos.Y, matPos.pos.Z);
 						pTrailer->Add();
 					}
-
-					pVehicle->OnStream(TRUE);
 				} else {
 					//pVehicle->SetLockedState(1);
 					pVehicle->Remove();		
-					pVehicle->OnStream(FALSE);
 				}
 
 				pVehicle->ProcessMarkers(); // car scanning shit

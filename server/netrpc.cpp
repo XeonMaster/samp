@@ -915,63 +915,6 @@ void ResolutionChanged(RPCParameters *rpcParams) {
 	if (pFilters) pFilters->OnPlayerResolutionChanged(bytePlayerID, iWidth, iHeight);
 }
 
-void PlayerStream(RPCParameters *rpcParams) {
-	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-	BYTE bytePlayerFor = pRak->GetIndexFromPlayerID(rpcParams->sender);
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-
-	CGameMode *pGameMode = pNetGame->GetGameMode();
-	CFilterScripts *pFilters = pNetGame->GetFilterScripts();
-
-	BYTE bytePlayerID;
-	BOOL bStreamIn;
-
-	bsData.Read(bytePlayerID);
-	bsData.Read(bStreamIn);
-
-	if (pGameMode) {
-		if (bStreamIn)
-			pGameMode->OnPlayerStreamIn(bytePlayerID, bytePlayerFor);
-		else
-			pGameMode->OnPlayerStreamOut(bytePlayerID, bytePlayerFor);
-	}
-	if (pFilters) {
-		if (bStreamIn)
-			pFilters->OnPlayerStreamIn(bytePlayerID, bytePlayerFor);
-		else
-			pFilters->OnPlayerStreamOut(bytePlayerID, bytePlayerFor);
-	}
-}
-
-void VehicleStream(RPCParameters *rpcParams) {
-	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
-	int iBitLength = rpcParams->numberOfBitsOfData;
-	BYTE bytePlayerFor = pRak->GetIndexFromPlayerID(rpcParams->sender);
-	RakNet::BitStream bsData(Data, (iBitLength / 8) + 1, false);
-
-	CGameMode *pGameMode = pNetGame->GetGameMode();
-	CFilterScripts *pFilters = pNetGame->GetFilterScripts();
-
-	VEHICLEID VehicleID;
-	BOOL bStreamIn;
-
-	bsData.Read(VehicleID);
-	bsData.Read(bStreamIn);
-
-	if (pGameMode) {
-		if (bStreamIn)
-			pGameMode->OnVehicleStreamIn(VehicleID, bytePlayerFor);
-		else
-			pGameMode->OnVehicleStreamOut(VehicleID, bytePlayerFor);
-	}
-	if (pFilters) {
-		if (bStreamIn)
-			pFilters->OnVehicleStreamIn(VehicleID, bytePlayerFor);
-		else
-			pFilters->OnVehicleStreamOut(VehicleID, bytePlayerFor);
-	}
-}
 //----------------------------------------------------
 
 void RegisterRPCs(RakServerInterface * pRakServer)
@@ -1001,8 +944,6 @@ void RegisterRPCs(RakServerInterface * pRakServer)
 	REGISTER_STATIC_RPC(pRakServer, MenuQuit);
 	REGISTER_STATIC_RPC(pRakServer, UnderMapTeleport);
 	REGISTER_STATIC_RPC(pRakServer, ResolutionChanged);
-	REGISTER_STATIC_RPC(pRakServer, PlayerStream);
-	REGISTER_STATIC_RPC(pRakServer, VehicleStream);
 }
 
 //----------------------------------------------------
@@ -1034,8 +975,6 @@ void UnRegisterRPCs(RakServerInterface * pRakServer)
 	UNREGISTER_STATIC_RPC(pRakServer, MenuQuit);
 	UNREGISTER_STATIC_RPC(pRakServer, UnderMapTeleport);
 	UNREGISTER_STATIC_RPC(pRakServer, ResolutionChanged);
-	UNREGISTER_STATIC_RPC(pRakServer, PlayerStream);
-	UNREGISTER_STATIC_RPC(pRakServer, VehicleStream);
 }
 
 //----------------------------------------------------

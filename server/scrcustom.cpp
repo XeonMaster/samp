@@ -2751,6 +2751,22 @@ static cell AMX_NATIVE_CALL n_GetVehicleWeaponRotation(AMX *amx, cell *params) {
 }
 
 //----------------------------------------------------------------------------------
+// native GetVehiclePoolSize()
+
+static cell AMX_NATIVE_CALL n_GetVehiclePoolSize(AMX *amx, cell *params) {
+	if (!pNetGame || !pNetGame->GetVehiclePool()) return -1;
+	return pNetGame->GetVehiclePool()->GetVehiclePoolCount();
+}
+
+//----------------------------------------------------------------------------------
+// native IsVehicleStreamedInForPlayer(vehicleid, forplayerid)
+
+static cell AMX_NATIVE_CALL n_IsVehicleStreamedInForPlayer(AMX *amx, cell *params) {
+	if (!pNetGame || !pNetGame->GetPlayerPool()->GetSlotState(params[2]) || !pNetGame->GetVehiclePool()->GetSlotState(params[1])) return 0;
+	return pNetGame->GetPlayerPool()->GetAt(params[2])->m_bStreamedVehicles[params[1]];
+}
+
+//----------------------------------------------------------------------------------
 // native ApplyAnimation(playerid, animlib[], animname[], Float:fS, opt1, opt2, opt3, opt4, opt5)
 
 static cell AMX_NATIVE_CALL n_ApplyAnimation(AMX *amx, cell *params)
@@ -4344,6 +4360,7 @@ static cell AMX_NATIVE_CALL n_IsPlayerInRangeOfPoint(AMX *amx, cell *params)
 
 //----------------------------------------------------------------------------------
 // native GetPlayerPoolSize();
+
 static cell AMX_NATIVE_CALL n_GetPlayerPoolSize(AMX *amx, cell *params) {
 	if (!pNetGame) return -1;
 	return pNetGame->GetPlayerPool()->GetPlayerPoolCount();
@@ -4390,6 +4407,14 @@ static cell AMX_NATIVE_CALL n_SetPlayerVisibleInScoreboardForPlayer(AMX *amx, ce
 	bsData.Write(params[3]);
 	pNetGame->GetRakServer()->RPC(RPC_ScrSetPlayerVisibleInScoreBoard, &bsData, HIGH_PRIORITY, RELIABLE, 0, pNetGame->GetRakServer()->GetPlayerIDFromIndex(params[1]), false, false);
 	return 1;
+}
+
+//----------------------------------------------------------------------------------
+// native IsPlayerStreamedInForPlayer(playerid, forplayerid);
+
+static cell AMX_NATIVE_CALL n_IsPlayerStreamedInForPlayer(AMX *amx, cell *params) {
+	if (!pNetGame || !pNetGame->GetPlayerPool()->GetSlotState(params[2]) || !pNetGame->GetPlayerPool()->GetSlotState(params[1])) return 0;
+	return pNetGame->GetPlayerPool()->GetAt(params[2])->m_bStreamedPlayers[params[1]];
 }
 
 //----------------------------------------------------------------------------------
@@ -4551,6 +4576,7 @@ AMX_NATIVE_INFO custom_Natives[] =
 	{ "CreatePlayerPickup",		n_CreatePlayerPickup },
 	{ "DestroyPlayerPickup",	n_DestroyPlayerPickup },
 	{ "IsPlayerInRangeOfPoint", n_IsPlayerInRangeOfPoint },
+	{ "IsPlayerStreamedInForPlayer", n_IsPlayerStreamedInForPlayer },
 
 	// Vehicle
 	{ "CreateVehicle",			n_CreateVehicle },
@@ -4580,6 +4606,8 @@ AMX_NATIVE_INFO custom_Natives[] =
 	{ "SetVehicleVirtualWorld",		n_SetVehicleVirtualWorld },
 	{ "GetVehicleVirtualWorld",		n_GetVehicleVirtualWorld },
 	{ "GetVehicleWeaponRotation",	n_GetVehicleWeaponRotation },
+	{ "GetVehiclePoolSize",			n_GetVehiclePoolSize },
+	{ "IsVehicleStreamedInForPlayer", n_IsVehicleStreamedInForPlayer },
 
 	// Messaging
 	{ "SendClientMessage",		n_SendClientMessage },

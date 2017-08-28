@@ -101,6 +101,7 @@ native IsPlayerInVehicle(playerid, vehicleid);
 native IsPlayerInAnyVehicle(playerid);
 native IsPlayerInCheckpoint(playerid);
 native IsPlayerInRaceCheckpoint(playerid);
+native IsPlayerStreamedForPlayer(playerid, forplayerid);
 
 // Virtual Worlds
 native SetPlayerVirtualWorld(playerid, worldid);

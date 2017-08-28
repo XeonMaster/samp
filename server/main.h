@@ -55,6 +55,8 @@
 
 #define HAVE_STDINT_H
 
+#define LOCKING_DISTANCE 200.0f
+
 // ------------
 // VERSION INFO
 // ------------

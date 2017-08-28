@@ -207,6 +207,9 @@ public:
 	BYTE					m_byteSpectateType;
 	DWORD					m_SpectateID; // Vehicle or player id
 	
+	BOOL					m_bStreamedPlayers[MAX_PLAYERS];
+	BOOL					m_bStreamedVehicles[MAX_PLAYERS];
+
 	ONFOOT_SYNC_DATA* GetOnFootSyncData() { return &m_ofSync; }
 	INCAR_SYNC_DATA* GetInCarSyncData() { return &m_icSync; }
 	PASSENGER_SYNC_DATA* GetPassengerSyncData() { return &m_psSync; }
@@ -305,6 +308,9 @@ public:
 
 	BYTE CheckWeapon(BYTE weapon);
 	void CheckKeyUpdatesForScript(WORD wKeys);
+
+	int IsInRangeOfPoint(VECTOR vecPos, float fRange);
+	float GetDistanceFromPoint(VECTOR vecPos);
 
 	BYTE GetSpecialAction() {
 		if(GetState() == PLAYER_STATE_ONFOOT) return m_ofSync.byteSpecialAction;

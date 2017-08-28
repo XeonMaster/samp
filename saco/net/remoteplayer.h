@@ -75,7 +75,6 @@ public:
 	
 	int					m_iIsInAModShop;
 	BYTE				m_byteVirtualWorld;
-	BOOL				m_bStreamedIn;
 
 public:
 
@@ -154,7 +153,6 @@ public:
 	void ShowOnScoreBoard(BOOL bEnabled) { m_bShowScoreBoard = bEnabled; };
 
 	void StateChange(BYTE byteNewState, BYTE byteOldState);
-	void OnStream(BOOL bStreamedIn);
 
 	void SetState(BYTE byteState) {	
 		if(byteState != m_byteState) {
