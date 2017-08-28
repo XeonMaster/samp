@@ -44,6 +44,7 @@ CRemotePlayer::CRemotePlayer()
 	m_dwLastHeadUpdate = GetTickCount();
 	m_dwStreamUpdate = 0;
 	m_bShowScoreBoard = TRUE;
+	m_bStreamedIn = FALSE;
 }
 
 //----------------------------------------------------
@@ -365,20 +366,25 @@ void CRemotePlayer::HandlePlayerPedStreaming()
 			if( m_bVisible && !pVehicle->IsRCVehicle() &&
 				pVehicle->GetDistanceFromLocalPlayerPed() < LOCKING_DISTANCE ) {
 				m_pPlayerPed->Add();
+				OnStream(TRUE);
 			} else {
+				
 				m_pPlayerPed->Remove();
+				OnStream(FALSE);
 			}
 		}
 
-	} else { // !InVehicle
-
+	} else { // !InVehicle		
 		if(m_bVisible && m_pPlayerPed->GetDistanceFromLocalPlayerPed() < LOCKING_DISTANCE) {
 			m_pPlayerPed->Add();
 			//pChatWindow->AddDebugMessage("Player %u streamed in\n",m_pPlayerPed->m_bytePlayerNumber);
+			OnStream(TRUE); // Stream In
+			
 		} else {
 			//pChatWindow->AddDebugMessage("Player %u streamed out\n",m_pPlayerPed->m_bytePlayerNumber);
 
 			m_pPlayerPed->Remove();
+			OnStream(FALSE); // Stream Out
 		}
 	}
 }
@@ -1134,6 +1140,19 @@ void CRemotePlayer::StateChange(BYTE byteNewState, BYTE byteOldState)
 			}
 		}
 	}	
+}
+
+//----------------------------------------------------
+
+void CRemotePlayer::OnStream(BOOL bStreamedIn) {
+	if (m_bStreamedIn == bStreamedIn) return;
+
+	RakNet::BitStream bsData;
+	bsData.Write(m_bytePlayerID);
+	bsData.Write(bStreamedIn);
+	pNetGame->GetRakClient()->RPC(RPC_PlayerStream, &bsData, HIGH_PRIORITY, RELIABLE, 0, false);
+
+	m_bStreamedIn = bStreamedIn;
 }
 
 //----------------------------------------------------

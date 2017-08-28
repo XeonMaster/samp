@@ -1401,9 +1401,11 @@ void CNetGame::UpdateInstagib()
 
 //----------------------------------------------------
 
-const PCHAR CNetGame::GetWeaponName(int iWeaponID)
+PCHAR CNetGame::GetWeaponName(int iWeaponID)
 {
 	switch(iWeaponID){
+
+
 		case WEAPON_FIST:				return "Fist";
 		case WEAPON_BRASSKNUCKLE:		return "Brass Knuckles";
 		case WEAPON_GOLFCLUB:			return "Golf Club";
@@ -1449,7 +1451,7 @@ const PCHAR CNetGame::GetWeaponName(int iWeaponID)
 		case WEAPON_FIREEXTINGUISHER: 	return "Fire Extinguisher";
 		case WEAPON_CAMERA:				return "Camera";
 		case WEAPON_NIGHTVISION:		return "Night Vision Goggles";
-		case WEAPON_INFRARED:			return "Thermal Vision Goggles";
+		case WEAPON_THERMALVISION:		return "Thermal Vision Goggles";
 		case WEAPON_PARACHUTE:			return "Parachute";
 		case WEAPON_ARMOUR:				return "Armour";
 		case WEAPON_VEHICLE:			return "Vehicle";

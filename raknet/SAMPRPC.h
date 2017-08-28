@@ -134,6 +134,8 @@
 	#define RPC_MenuQuit					"dy"
 	#define RPC_UnderMapTeleport			"a2"
 	#define RPC_ResolutionChanged			"a3"
+	#define RPC_PlayerStream				"a7"
+	#define RPC_VehicleStream				"a8"
 
 	// rcon
 	#define RPC_RconConnect					"dp"

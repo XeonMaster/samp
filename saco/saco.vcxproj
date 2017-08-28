@@ -82,10 +82,10 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>dxguid.lib;d3d9.lib;d3dx9.lib;User32.lib;comctl32.lib;advapi32.lib;kernel32.lib;gdi32.lib;odbc32.lib;odbccp32.lib;wsock32.lib;winmm.lib;wininet.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>dxguid.lib;d3d9.lib;d3dx9.lib;User32.lib;comctl32.lib;advapi32.lib;kernel32.lib;gdi32.lib;odbc32.lib;odbccp32.lib;wsock32.lib;winmm.lib;wininet.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>d3d9;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%DXSDK_DIR%\Lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Debug/samp.pdb</ProgramDatabaseFile>
       <GenerateMapFile>true</GenerateMapFile>
@@ -163,6 +163,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\raknet\zlib\adler32.c" />
+    <ClCompile Include="..\raknet\zlib\compress.c" />
+    <ClCompile Include="..\raknet\zlib\crc32.c" />
+    <ClCompile Include="..\raknet\zlib\deflate.c" />
+    <ClCompile Include="..\raknet\zlib\gzio.c" />
+    <ClCompile Include="..\raknet\zlib\infback.c" />
+    <ClCompile Include="..\raknet\zlib\inffast.c" />
+    <ClCompile Include="..\raknet\zlib\inflate.c" />
+    <ClCompile Include="..\raknet\zlib\inftrees.c" />
+    <ClCompile Include="..\raknet\zlib\trees.c" />
+    <ClCompile Include="..\raknet\zlib\uncompr.c" />
+    <ClCompile Include="..\raknet\zlib\zutil.c" />
     <ClCompile Include="events.cpp">
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Disabled</Optimization>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">WIN32;_DEBUG;_WINDOWS</PreprocessorDefinitions>
@@ -592,6 +604,17 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\raknet\zlib\crc32.h" />
+    <ClInclude Include="..\raknet\zlib\deflate.h" />
+    <ClInclude Include="..\raknet\zlib\inffast.h" />
+    <ClInclude Include="..\raknet\zlib\inffixed.h" />
+    <ClInclude Include="..\raknet\zlib\inflate.h" />
+    <ClInclude Include="..\raknet\zlib\inftrees.h" />
+    <ClInclude Include="..\raknet\zlib\trees.h" />
+    <ClInclude Include="..\raknet\zlib\zconf.h" />
+    <ClInclude Include="..\raknet\zlib\zconf.in.h" />
+    <ClInclude Include="..\raknet\zlib\zlib.h" />
+    <ClInclude Include="..\raknet\zlib\zutil.h" />
     <ClInclude Include="net\gangzonepool.h" />
     <ClInclude Include="httpclient.h" />
     <ClInclude Include="net\localplayer.h" />

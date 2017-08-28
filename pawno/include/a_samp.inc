@@ -295,4 +295,8 @@ forward OnPlayerKeyStateChange(playerid, newkeys, oldkeys);
 forward OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ);
 forward OnPlayerResolutionChanged(playerid, width, height);
 forward OnPlayerFallUnderMap(playerid, Float:fX, Float:fY, Float:fZ);
+forward OnPlayerStreamIn(playerid, forplayerid);
+forward OnPlayerStreamOut(playerid, forplayerid);
+forward OnVehicleStreamIn(vehicleid, forplayerid);
+forward OnVehicleStreamOut(vehicleid, forplayerid);
 forward OnPlayerUpdate(playerid); // called for every player network update. don't execute too much code in here. return 0 to prevent replication to other clients.

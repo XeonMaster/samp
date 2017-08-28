@@ -892,6 +892,61 @@ int CGameMode::OnPlayerResolutionChanged(cell playerid, cell width, cell height)
 	return (int)ret;
 }
 
+//----------------------------------------------------------------------------------
+// forward OnPlayerStreamIn(playerid, forplayerid)
+int CGameMode::OnPlayerStreamIn(cell playerid, cell forplayerid) {
+	CHECK_INIT();
+	int idx;
+	cell ret = 1;
+	if (!amx_FindPublic(&m_amx, "OnPlayerStreamIn", &idx)) {
+		amx_Push(&m_amx, forplayerid);
+		amx_Push(&m_amx, playerid);
+		amx_Exec(&m_amx, &ret, idx);
+	}
+	return (int)ret;
+}
+
+//----------------------------------------------------------------------------------
+// forward OnPlayerStreamOut(playerid, forplayerid)
+int CGameMode::OnPlayerStreamOut(cell playerid, cell forplayerid) {
+	CHECK_INIT();
+	int idx;
+	cell ret = 1;
+	if (!amx_FindPublic(&m_amx, "OnPlayerStreamOut", &idx)) {
+		amx_Push(&m_amx, forplayerid);
+		amx_Push(&m_amx, playerid);
+		amx_Exec(&m_amx, &ret, idx);
+	}
+	return (int)ret;
+}
+
+//----------------------------------------------------------------------------------
+// forward OnVehicleStreamIn(vehicleid, forplayerid)
+int CGameMode::OnVehicleStreamIn(cell vehicleid, cell forplayerid) {
+	CHECK_INIT();
+	int idx;
+	cell ret = 1;
+	if (!amx_FindPublic(&m_amx, "OnVehicleStreamIn", &idx)) {
+		amx_Push(&m_amx, forplayerid);
+		amx_Push(&m_amx, vehicleid);
+		amx_Exec(&m_amx, &ret, idx);
+	}
+	return (int)ret;
+}
+
+//----------------------------------------------------------------------------------
+// forward OnVehicleStreamOut(vehicleid, forplayerid)
+int CGameMode::OnVehicleStreamOut(cell vehicleid, cell forplayerid) {
+	CHECK_INIT();
+	int idx;
+	cell ret = 1;
+	if (!amx_FindPublic(&m_amx, "OnVehicleStreamOut", &idx)) {
+		amx_Push(&m_amx, forplayerid);
+		amx_Push(&m_amx, vehicleid);
+		amx_Exec(&m_amx, &ret, idx);
+	}
+	return (int)ret;
+}
 
 //----------------------------------------------------------------------------------
 // forward OnPlayerUpdate(playerid)

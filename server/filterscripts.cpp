@@ -1155,7 +1155,77 @@ int CFilterScripts::OnPlayerResolutionChanged(cell playerid, cell width, cell he
 	}
 	return (int)ret;
 }
+//----------------------------------------------------------------------------------
+// forward OnPlayerStreamIn(playerid, forplayerid)
+int CFilterScripts::OnPlayerStreamIn(cell playerid, cell forplayerid) {
+	int idx;
+	cell ret = 1;
+	for (int i = 0; i < MAX_FILTER_SCRIPTS; i++) {
+		if (m_pFilterScripts[i]) {
+			if (!amx_FindPublic(m_pFilterScripts[i], "OnPlayerStreamIn", &idx)) {
+				amx_Push(m_pFilterScripts[i], forplayerid);
+				amx_Push(m_pFilterScripts[i], playerid);
+				amx_Exec(m_pFilterScripts[i], &ret, idx);
+			}
+		}
+	}
+	
+	return (int)ret;
+}
 
+//----------------------------------------------------------------------------------
+// forward OnPlayerStreamOut(playerid, forplayerid)
+int CFilterScripts::OnPlayerStreamOut(cell playerid, cell forplayerid) {
+	int idx;
+	cell ret = 1;
+	for (int i = 0; i < MAX_FILTER_SCRIPTS; i++) {
+		if (m_pFilterScripts[i]) {
+			if (!amx_FindPublic(m_pFilterScripts[i], "OnPlayerStreamOut", &idx)) {
+				amx_Push(m_pFilterScripts[i], forplayerid);
+				amx_Push(m_pFilterScripts[i], playerid);
+				amx_Exec(m_pFilterScripts[i], &ret, idx);
+			}
+		}
+	}
+
+	return (int)ret;
+}
+
+//----------------------------------------------------------------------------------
+// forward OnVehicleStreamIn(vehicleid, forplayerid)
+int CFilterScripts::OnVehicleStreamIn(cell vehicleid, cell forplayerid) {
+	int idx;
+	cell ret = 1;
+	for (int i = 0; i < MAX_FILTER_SCRIPTS; i++) {
+		if (m_pFilterScripts[i]) {
+			if (!amx_FindPublic(m_pFilterScripts[i], "OnPlayerStreamIn", &idx)) {
+				amx_Push(m_pFilterScripts[i], forplayerid);
+				amx_Push(m_pFilterScripts[i], vehicleid);
+				amx_Exec(m_pFilterScripts[i], &ret, idx);
+			}
+		}
+	}
+
+	return (int)ret;
+}
+
+//----------------------------------------------------------------------------------
+// forward OnVehicleStreamOut(vehicleid, forplayerid)
+int CFilterScripts::OnVehicleStreamOut(cell vehicleid, cell forplayerid) {
+	int idx;
+	cell ret = 1;
+	for (int i = 0; i < MAX_FILTER_SCRIPTS; i++) {
+		if (m_pFilterScripts[i]) {
+			if (!amx_FindPublic(m_pFilterScripts[i], "OnVehicleStreamOut", &idx)) {
+				amx_Push(m_pFilterScripts[i], forplayerid);
+				amx_Push(m_pFilterScripts[i], vehicleid);
+				amx_Exec(m_pFilterScripts[i], &ret, idx);
+			}
+		}
+	}
+
+	return (int)ret;
+}
 //----------------------------------------------------------------------------------
 // forward OnPlayerUpdate(playerid)
 

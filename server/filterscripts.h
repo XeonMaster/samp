@@ -74,6 +74,10 @@ public:
 	int OnPlayerClickMap(cell playerid, float x, float y, float z);
 	int OnPlayerFallUnderMap(cell playerid, float x, float y, float z);
 	int OnPlayerResolutionChanged(cell playerid, cell width, cell height);
+	int OnPlayerStreamIn(cell playerid, cell forplayerid);
+	int OnPlayerStreamOut(cell playerid, cell forplayerid);
+	int OnVehicleStreamIn(cell vehicleid, cell forplayerid);
+	int OnVehicleStreamOut(cell vehicleid, cell forplayerid);
 	int OnPlayerUpdate(cell playerid);
 };
 

@@ -35,6 +35,7 @@ CVehicle::CVehicle( int iType, float fPosX, float fPosY,
 	m_pVehicle = 0;
 	m_dwGTAId = 0;
 	m_pTrailer = NULL;
+	m_bStreamedIn = FALSE;
 
 	if( (iType != TRAIN_PASSENGER_LOCO) &&
 		(iType != TRAIN_FREIGHT_LOCO) &&
@@ -770,5 +771,22 @@ BOOL CVehicle::VerifyInstance()
 	}
 	return FALSE;
 }
+
+//-----------------------------------------------------------
+
+void CVehicle::OnStream(BOOL bStreamIn)
+{
+	if (bStreamIn == m_bStreamedIn)
+		return; // Already streamed in, so no need to send to the server.
+
+	RakNet::BitStream bsData;
+	bsData.Write((VEHICLEID)pNetGame->GetVehiclePool()->FindIDFromGtaPtr(m_pVehicle));
+	bsData.Write(bStreamIn);
+
+	pNetGame->GetRakClient()->RPC(RPC_VehicleStream, &bsData, HIGH_PRIORITY, RELIABLE, 0, false);
+
+	m_bStreamedIn = bStreamIn;
+}
+
 //-----------------------------------------------------------
 // EOF

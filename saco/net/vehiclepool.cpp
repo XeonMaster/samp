@@ -275,13 +275,13 @@ void CVehiclePool::Process()
 				}
 #endif */
 				// Remove or Add vehicles as they leave/enter a radius around the player
+				
 				if( (pVehicle->GetDistanceFromLocalPlayerPed() < LOCKING_DISTANCE)
-					&& m_byteVirtualWorld[x] == localVW ) {
+					&& m_byteVirtualWorld[x] == localVW) {
 
 					pVehicle->Add();
 					//pVehicle->SetLockedState(0);
 					
-
 					CVehicle* pTrailer = pVehicle->GetTrailer();
 					if (pTrailer && !pTrailer->IsAdded())
 					{
@@ -291,9 +291,11 @@ void CVehiclePool::Process()
 						pTrailer->Add();
 					}
 
+					pVehicle->OnStream(TRUE);
 				} else {
 					//pVehicle->SetLockedState(1);
-					pVehicle->Remove();					
+					pVehicle->Remove();		
+					pVehicle->OnStream(FALSE);
 				}
 
 				pVehicle->ProcessMarkers(); // car scanning shit

@@ -28,6 +28,9 @@
     <Filter Include="rcon">
       <UniqueIdentifier>{7d09c6f6-b1be-438f-9b53-fe8adbf76da1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="raknet\zlib">
+      <UniqueIdentifier>{c8c7425e-53af-4980-807a-3714f72bd23c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="amx\amx.c">
@@ -314,6 +317,42 @@
     <ClCompile Include="object.cpp" />
     <ClCompile Include="query.cpp" />
     <ClCompile Include="vehicle.cpp" />
+    <ClCompile Include="..\raknet\zlib\adler32.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\compress.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\crc32.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\deflate.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\gzio.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\infback.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\inffast.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\inflate.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\inftrees.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\trees.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\uncompr.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="..\raknet\zlib\zutil.c">
+      <Filter>raknet\zlib</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="amx\amx.h">
@@ -705,5 +744,38 @@
     <ClInclude Include="system.h" />
     <ClInclude Include="vehicle.h" />
     <ClInclude Include="vehmods.h" />
+    <ClInclude Include="..\raknet\zlib\crc32.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\deflate.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\inffast.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\inffixed.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\inflate.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\inftrees.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\trees.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\zconf.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\zconf.in.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\zlib.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
+    <ClInclude Include="..\raknet\zlib\zutil.h">
+      <Filter>raknet\zlib</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

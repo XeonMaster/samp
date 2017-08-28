@@ -179,11 +179,12 @@ public:
 	void SetWeather(BYTE byteWeather);
 	void SetGravity(float fGravity);
 	void UpdateInstagib();
-	const PCHAR GetWeaponName(int iWeaponID);
+	PCHAR GetWeaponName(int iWeaponID);
 };
 
 //----------------------------------------------------
 
+#define	WEAPON_FIST						0
 #define WEAPON_BRASSKNUCKLE				1
 #define WEAPON_GOLFCLUB					2
 #define WEAPON_NITESTICK				3
@@ -202,6 +203,9 @@ public:
 #define WEAPON_GRENADE					16
 #define WEAPON_TEARGAS					17
 #define WEAPON_MOLTOV					18
+#define WEAPON_ROCKET					19
+#define WEAPON_ROCKET_HS				20
+#define WEAPON_FREEFALLBOMB				21
 #define WEAPON_COLT45					22
 #define WEAPON_SILENCED					23
 #define WEAPON_DEAGLE					24
@@ -227,10 +231,15 @@ public:
 #define WEAPON_NIGHTVISION				44
 #define WEAPON_THERMALVISION			45
 #define WEAPON_PARACHUTE				46
+#define WEAPON_ARMOUR					47
 #define WEAPON_VEHICLE					49
+#define WEAPON_HELIBLADES				50
+#define WEAPON_EXPLOSION				51
 #define WEAPON_DROWN					53
 #define WEAPON_COLLISION				54
-
+#define WEAPON_PASSENGER_DRIVEBY		55
+#define WEAPON_FIRE						56
+#define WEAPON_SUICIDE					255
 //----------------------------------------------------
 
 #endif
