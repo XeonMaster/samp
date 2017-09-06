@@ -190,6 +190,11 @@ BOOL ApplyPreGamePatches()
 	UnFuck(0x5B8E6A,4);
 	*(DWORD *)0x5B8E6A = 134217728; // 128MB
 
+	UnFuck(0x745BC9, 1);
+	*(WORD *)0x745BC9 = 0x9090;
+	UnFuck(0x7459E1, 1);
+	*(WORD *)0x7459E1 = 0x9090;
+
 	// For SCM disable/enable
 	UnFuck(0x469EF5,2);
 
@@ -552,11 +557,6 @@ void ApplyInGamePatches()
 	// Remove the CReferences call from CTaskEnterVehicleDriver ctor
 	UnFuck(0x63ADC8,6);
 	memset((PVOID)0x63ADC8,0x90,6);
-
-	UnFuck(0x745BC9, 1);
-	*(WORD *)0x745BC9 = 0x9090;
-	UnFuck(0x7459E1, 1);
-	*(WORD *)0x7459E1 = 0x9090;
 
 	// Rest of the stuff
 	RelocateScanListHack();
