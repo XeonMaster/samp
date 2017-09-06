@@ -247,6 +247,7 @@ public:
 	};
 
 	void UpdatePosition(float x, float y, float z);
+	void ProcessStreaming();
 
 	// Process this player during the server loop.
 	void Process(float fElapsedTime);
@@ -308,9 +309,13 @@ public:
 
 	BYTE CheckWeapon(BYTE weapon);
 	void CheckKeyUpdatesForScript(WORD wKeys);
+	void CheckWeaponUpdatesForScript(BYTE weapon);
 
 	int IsInRangeOfPoint(VECTOR vecPos, float fRange);
 	float GetDistanceFromPoint(VECTOR vecPos);
+
+	void ShowPlayer(BYTE bytePlayerID, bool show);
+	void ShowVehicle(VEHICLEID vehicleID, bool show);
 
 	BYTE GetSpecialAction() {
 		if(GetState() == PLAYER_STATE_ONFOOT) return m_ofSync.byteSpecialAction;

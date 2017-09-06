@@ -132,6 +132,7 @@ CVehicle::CVehicle( int iType, float fPosX, float fPosY,
 	m_dwTimeSinceLastDriven = GetTickCount();
 	m_bDoorsLocked = FALSE;
 	m_bShowMarker = bShowMarker;
+	m_pVehicle->pDriver = NULL;
 }
 
 //-----------------------------------------------------------
@@ -532,14 +533,14 @@ void CVehicle::ProcessMarkers()
 	}
 
 	// Add or remove car scanning markers.
-	if(GetDistanceFromLocalPlayerPed() < CSCANNER_DISTANCE && !IsOccupied() && m_bShowMarker) {
+	if(IsAdded() && !IsOccupied() && m_bShowMarker) {
 		// SHOW IT
 		if(!m_dwMarkerID)  {
 			ScriptCommand(&tie_marker_to_car, m_dwGTAId, 1, 2, &m_dwMarkerID);
 			ScriptCommand(&set_marker_color,m_dwMarkerID,200);
 		}	
 	} 
-	else if(IsOccupied() || GetDistanceFromLocalPlayerPed() >= CSCANNER_DISTANCE || !m_bShowMarker) {
+	else if(IsOccupied() || !IsAdded() || !m_bShowMarker) {
 		// REMOVE IT	
 		if(m_dwMarkerID) {
 			ScriptCommand(&disable_marker, m_dwMarkerID);
@@ -726,7 +727,7 @@ BOOL CVehicle::HasADriver()
 {	
 	if(!m_pVehicle) return FALSE;
 	if(!GamePool_Vehicle_GetAt(m_dwGTAId)) return FALSE;
-	if (!GamePool_Ped_GetAt(GamePool_Ped_GetIndex(m_pVehicle->pDriver))) return FALSE;
+	
 	if(m_pVehicle->pDriver) {
 			if (IN_VEHICLE(m_pVehicle->pDriver))
 				return TRUE;
@@ -748,7 +749,7 @@ void CVehicle::RemoveEveryoneFromVehicle()
 	float fPosZ = m_pVehicle->entity.mat->pos.Z;
 
 	int iPlayerID = 0;
-	if (m_pVehicle->pDriver) {
+	if (m_pVehicle->pDriver && IN_VEHICLE(m_pVehicle->pDriver)) {
 		iPlayerID = GamePool_Ped_GetIndex( m_pVehicle->pDriver );
 		ScriptCommand( &remove_actor_from_car_and_put_at, iPlayerID, fPosX, fPosY, fPosZ + 2 );
 	}

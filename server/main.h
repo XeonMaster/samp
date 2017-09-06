@@ -47,6 +47,28 @@
 #define EVENT_TYPE_CARCOMPONENT		2
 #define EVENT_TYPE_CARCOLOR			3
 
+#define KEY_ACTION				(1)
+#define KEY_CROUCH				(2)
+#define KEY_FIRE				(4)
+#define KEY_SPRINT				(8)
+#define KEY_SECONDARY_ATTACK	(16)
+#define KEY_JUMP				(32)
+#define KEY_LOOK_RIGHT			(64)
+#define KEY_HANDBRAKE			(128)
+#define KEY_LOOK_LEFT			(256)
+#define KEY_SUBMISSION			(512)
+#define KEY_LOOK_BEHIND			(512)
+#define KEY_WALK				(1024)
+#define KEY_ANALOG_UP			(2048)
+#define KEY_ANALOG_DOWN			(4096)
+#define KEY_ANALOG_RIGHT		(16384)
+#define KEY_ANALOG_LEFT			(8192)
+
+#define KEY_UP					(65408)
+#define KEY_DOWN				(128)
+#define KEY_LEFT				(65408)
+#define KEY_RIGHT				(128)
+
 #define PI 3.14159265
 
 #define ARRAY_SIZE(a)	( sizeof((a)) / sizeof(*(a)) )

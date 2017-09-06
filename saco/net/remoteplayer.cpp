@@ -82,7 +82,7 @@ void CRemotePlayer::Process(BYTE byteLocalWorld)
 				pNetGame->m_fGlobalChatRadius,
 				m_bVisible);
 
-			HandlePlayerPedStreaming();
+			//HandlePlayerPedStreaming();
 
 			if(GetTickCount() > m_dwWaitForEntryExitAnims) {
 				HandleVehicleEntryExit();

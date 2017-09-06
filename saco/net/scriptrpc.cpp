@@ -1670,6 +1670,45 @@ void ScrSetPlayerVisibleInScoreBoard(RPCParameters *rpcParams) {
 
 //----------------------------------------------------
 
+void ScrShowPlayerForPlayer(RPCParameters *rpcParams) {
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	RakNet::BitStream bsData((unsigned char*)Data, (iBitLength / 8) + 1, false);
+	BYTE bytePlayerID;
+	bool toggle;
+	bsData.Read(bytePlayerID);
+	bsData.Read(toggle);
+
+	if (!pNetGame->GetPlayerPool()->GetSlotState(bytePlayerID)) return;
+	CPlayerPed *pPed = pNetGame->GetPlayerPool()->GetAt(bytePlayerID)->GetPlayerPed();
+	if (toggle)
+		pPed->Add();
+	else
+		pPed->Remove();
+
+}
+
+//----------------------------------------------------
+
+void ScrShowVehicleForPlayer(RPCParameters *rpcParams) {
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	RakNet::BitStream bsData((unsigned char*)Data, (iBitLength / 8) + 1, false);
+	VEHICLEID vehicleID;
+	bool toggle;
+	bsData.Read(vehicleID);
+	bsData.Read(toggle);
+
+	if (!pNetGame->GetVehiclePool()->GetSlotState(vehicleID)) return;
+	CVehicle *pVehicle = pNetGame->GetVehiclePool()->GetAt(vehicleID);
+	if (toggle)
+		pVehicle->Add();
+	else
+		pVehicle->Remove();
+}
+
+//----------------------------------------------------
+
 void RegisterScriptRPCs(RakClientInterface* pRakClient)
 {
 	REGISTER_STATIC_RPC(pRakClient, ScrSetSpawnInfo);
@@ -1746,6 +1785,8 @@ void RegisterScriptRPCs(RakClientInterface* pRakClient)
 	REGISTER_STATIC_RPC(pRakClient, ScrUsePlayerPedAnims);
 	REGISTER_STATIC_RPC(pRakClient, ScrToggleVehicleMarker);
 	REGISTER_STATIC_RPC(pRakClient, ScrSetPlayerVisibleInScoreBoard);
+	REGISTER_STATIC_RPC(pRakClient, ScrShowPlayerForPlayer);
+	REGISTER_STATIC_RPC(pRakClient, ScrShowVehicleForPlayer);
 }
 
 //----------------------------------------------------
@@ -1825,6 +1866,8 @@ void UnRegisterScriptRPCs(RakClientInterface* pRakClient)
 	UNREGISTER_STATIC_RPC(pRakClient, ScrUsePlayerPedAnims);
 	UNREGISTER_STATIC_RPC(pRakClient, ScrToggleVehicleMarker);
 	UNREGISTER_STATIC_RPC(pRakClient, ScrSetPlayerVisibleInScoreBoard);
+	UNREGISTER_STATIC_RPC(pRakClient, ScrShowPlayerForPlayer);
+	UNREGISTER_STATIC_RPC(pRakClient, ScrShowVehicleForPlayer);
 }
 
 //----------------------------------------------------

@@ -231,6 +231,7 @@ int main (int argc, char** argv)
 	bool bGameMod = false;
 	bool bEnableAC = false;
 	bool bAllowQuery = true;
+	float stream_distance = 200.0f;
 
 	// Open the log file
 	LoadLogFile();
@@ -323,6 +324,7 @@ int main (int argc, char** argv)
 	pConsole->AddVariable("anticheat",CON_VARTYPE_BOOL, /* CON_VARFLAG_RULE */ 0, &bEnableAC);
 	pConsole->AddVariable("instagib", CON_VARTYPE_BOOL, CON_VARFLAG_RULE, &bEnableInstagib, ServerInstagibChanged);
 	pConsole->AddVariable("myriad", CON_VARTYPE_BOOL, 0, &bGameMod);
+	pConsole->AddVariable("stream_distance", CON_VARTYPE_FLOAT, 0, &stream_distance);
 
 	// Add 16 gamemode variables.
 	int x=0;

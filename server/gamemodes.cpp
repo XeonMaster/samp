@@ -949,6 +949,21 @@ int CGameMode::OnVehicleStreamOut(cell vehicleid, cell forplayerid) {
 }
 
 //----------------------------------------------------------------------------------
+// forward OnPlayerWeaponChanged(playerid, oldweaponid, newweaponid);
+int CGameMode::OnPlayerWeaponChanged(cell playerid, cell oldweaponid, cell newweaponid) {
+	CHECK_INIT();
+	int idx;
+	cell ret = 1;
+	if (!amx_FindPublic(&m_amx, "OnPlayerWeaponChanged", &idx)) {
+		amx_Push(&m_amx, newweaponid);
+		amx_Push(&m_amx, oldweaponid);
+		amx_Push(&m_amx, playerid);
+		amx_Exec(&m_amx, &ret, idx);
+	}
+	return (int)ret;
+}
+
+//----------------------------------------------------------------------------------
 // forward OnPlayerUpdate(playerid)
 
 int CGameMode::OnPlayerUpdate(cell playerid)

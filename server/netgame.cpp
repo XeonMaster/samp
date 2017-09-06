@@ -774,7 +774,7 @@ void CNetGame::BroadcastDistanceRPC( char *szUniqueID,
 	
 	int iExVW = m_pPlayerPool->GetPlayerVirtualWorld(byteExcludedPlayer);
 
-	while(x!=MAX_PLAYERS)
+	while(x <= pNetGame->GetPlayerPool()->GetPlayerPoolCount())
 	{
 		if( (m_pPlayerPool->GetSlotState(x) == TRUE) && 
 			(x != byteExcludedPlayer) )
@@ -796,6 +796,40 @@ void CNetGame::BroadcastDistanceRPC( char *szUniqueID,
 }
 
 //--------------------------------------------------------
+
+void CNetGame::BroadcastDataToStreamedPlayers(RakNet::BitStream *bitStream, PacketPriority priority,
+	PacketReliability reliability,
+	char orderingStream,
+	BYTE byteExcludedPlayer) {
+
+	if (!GetPlayerPool()) return;
+
+	CPlayerPool *pPlayerPool = GetPlayerPool();
+
+	for (BYTE i = 0; i <= pPlayerPool->GetPlayerPoolCount(); i++) {
+		if (pPlayerPool->GetSlotState(i) && i != byteExcludedPlayer) {
+			CPlayer *pPlayer = pPlayerPool->GetAt(i);
+			if (pPlayer->m_bStreamedPlayers[byteExcludedPlayer]) {
+				float fDist = pPlayer->GetDistanceFromPoint(pPlayerPool->GetAt(byteExcludedPlayer)->m_vecPos);
+				int send_rate = GetBroadcastSendRateFromPlayerDistance(fDist);
+				int r = 0;
+
+				if (send_rate > 0) 
+					r = (int)(rand() % send_rate);
+				else 
+					r = 0;
+
+				if (!r) {
+					m_pRak->Send(bitStream, priority, reliability, orderingStream,
+						m_pRak->GetPlayerIDFromIndex(i), FALSE);
+				}
+			}
+		}
+	}
+}
+
+//--------------------------------------------------------
+
 
 void CNetGame::AdjustAimSync(RakNet::BitStream *bitStream, BYTE byteTargetPlayerID, RakNet::BitStream *adjbitStream)
 {

@@ -78,6 +78,7 @@ public:
 	int OnPlayerStreamOut(cell playerid, cell forplayerid);
 	int OnVehicleStreamIn(cell vehicleid, cell forplayerid);
 	int OnVehicleStreamOut(cell vehicleid, cell forplayerid);
+	int OnPlayerWeaponChanged(cell playerid, cell oldweaponid, cell newweaponid);
 	int OnPlayerUpdate(cell playerid);
 };
 

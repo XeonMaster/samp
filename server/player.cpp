@@ -118,6 +118,8 @@ void CPlayer::UpdatePosition(float x, float y, float z)
 	m_vecPos.Y = y; 
 	m_vecPos.Z = z;
 
+	ProcessStreaming();
+
 	if (m_bCheckpointEnabled)
 	{
 		float fSX = (m_vecPos.X - m_vecCheckpoint.X) * (m_vecPos.X - m_vecCheckpoint.X);
@@ -167,40 +169,55 @@ void CPlayer::UpdatePosition(float x, float y, float z)
 			}
 		}
 	}
+}
 
+//----------------------------------------------------
+
+void CPlayer::ProcessStreaming() {
 	CGameMode *pGameMode = pNetGame->GetGameMode();
 	CFilterScripts *pFilters = pNetGame->GetFilterScripts();
 
+	float stream_distance = pConsole->GetFloatVariable("stream_distance");
+
 	for (BYTE i = 0; i <= pNetGame->GetPlayerPool()->GetPlayerPoolCount(); i++) {
 		if (pNetGame->GetPlayerPool()->GetSlotState(i) && i != m_bytePlayerID) {
-			CPlayer *pPlayer = pNetGame->GetPlayerPool()->GetAt(i);
-			float distance = GetDistanceFromPoint(pPlayer->m_vecPos);
-			if (distance < LOCKING_DISTANCE && !m_bStreamedPlayers[i]) { // Stream In
-				if (pGameMode) pGameMode->OnPlayerStreamIn(i, m_bytePlayerID);
-				if (pFilters) pFilters->OnPlayerStreamIn(i, m_bytePlayerID);
-				m_bStreamedPlayers[i] = TRUE;
-			}
-			else if (distance > LOCKING_DISTANCE && m_bStreamedPlayers[i]) { // Stream Out
-				if (pGameMode) pGameMode->OnPlayerStreamOut(i, m_bytePlayerID);
-				if (pFilters) pFilters->OnPlayerStreamOut(i, m_bytePlayerID);
-				m_bStreamedPlayers[i] = FALSE;
+			if (pNetGame->GetPlayerPool()->GetPlayerVirtualWorld(i) == pNetGame->GetPlayerPool()->GetPlayerVirtualWorld(m_bytePlayerID)) {
+				CPlayer *pPlayer = pNetGame->GetPlayerPool()->GetAt(i);
+				float distance = GetDistanceFromPoint(pPlayer->m_vecPos);
+				if (distance <= stream_distance && !m_bStreamedPlayers[i]) { // Stream In
+					if (pGameMode) pGameMode->OnPlayerStreamIn(i, m_bytePlayerID);
+					if (pFilters) pFilters->OnPlayerStreamIn(i, m_bytePlayerID);
+					m_bStreamedPlayers[i] = TRUE;
+					ShowPlayer(i, true);
+				}
+				else if (distance > stream_distance && m_bStreamedPlayers[i]) { // Stream Out
+					if (pGameMode) pGameMode->OnPlayerStreamOut(i, m_bytePlayerID);
+					if (pFilters) pFilters->OnPlayerStreamOut(i, m_bytePlayerID);
+					m_bStreamedPlayers[i] = FALSE;
+					ShowPlayer(i, false);
+				}
 			}
 		}
 	}
 
 	for (VEHICLEID i = 0; i <= pNetGame->GetVehiclePool()->GetVehiclePoolCount(); i++) {
 		if (pNetGame->GetVehiclePool()->GetSlotState(i)) {
-			CVehicle *pVehicle = pNetGame->GetVehiclePool()->GetAt(i);
-			float distance = GetDistanceFromPoint(pVehicle->m_matWorld.pos);
-			if (distance < LOCKING_DISTANCE && !m_bStreamedVehicles[i]) { // Stream In
-				if (pGameMode) pGameMode->OnVehicleStreamIn(i, m_bytePlayerID);
-				if (pFilters) pFilters->OnVehicleStreamIn(i, m_bytePlayerID);
-				m_bStreamedVehicles[i] = TRUE;
-			}
-			else if (distance > LOCKING_DISTANCE && m_bStreamedVehicles[i]) { // Stream Out
-				if (pGameMode) pGameMode->OnVehicleStreamOut(i, m_bytePlayerID);
-				if (pFilters) pFilters->OnVehicleStreamOut(i, m_bytePlayerID);
-				m_bStreamedVehicles[i] = FALSE;
+			if (pNetGame->GetVehiclePool()->GetVehicleVirtualWorld(i) == pNetGame->GetPlayerPool()->GetPlayerVirtualWorld(m_bytePlayerID)) { // Make sure its the same virtual world as the player!
+				CVehicle *pVehicle = pNetGame->GetVehiclePool()->GetAt(i);
+				float distance = GetDistanceFromPoint(pVehicle->m_matWorld.pos);
+
+				if (distance <= stream_distance && !m_bStreamedVehicles[i]) { // Stream In
+					m_bStreamedVehicles[i] = TRUE;
+					ShowVehicle(i, true);
+					if (pGameMode) pGameMode->OnVehicleStreamIn(i, m_bytePlayerID);
+					if (pFilters) pFilters->OnVehicleStreamIn(i, m_bytePlayerID);
+				}
+				else if (distance > stream_distance && m_bStreamedVehicles[i] && m_VehicleID != i) { // Stream Out
+					m_bStreamedVehicles[i] = FALSE;
+					ShowVehicle(i, false);
+					if (pGameMode) pGameMode->OnVehicleStreamOut(i, m_bytePlayerID);
+					if (pFilters) pFilters->OnVehicleStreamOut(i, m_bytePlayerID);
+				}
 			}
 		}
 	}
@@ -300,6 +317,10 @@ void CPlayer::BroadcastSyncData()
 	
 		bsSync.Write(byteSyncHealthArmour);
 	
+		if (m_ofSync.byteCurrentWeapon == WEAPON_NIGHTVISION || m_ofSync.byteCurrentWeapon == WEAPON_THERMALVISION && m_ofSync.wKeys & KEY_FIRE) {
+			m_ofSync.wKeys &= ~(KEY_FIRE); // Remove KEY_FIRE so we don't get the vision bug!
+		}
+
 		// CURRENT WEAPON
 		bsSync.Write(m_ofSync.byteCurrentWeapon);
 
@@ -333,7 +354,7 @@ void CPlayer::BroadcastSyncData()
 			bsSync.Write(false);
 		}
 
-		pNetGame->BroadcastData(&bsSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0,m_bytePlayerID);
+		pNetGame->BroadcastDataToStreamedPlayers(&bsSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0,m_bytePlayerID);
 	}
 	else if(GetState() == PLAYER_STATE_DRIVER &&
 		m_byteUpdateFromNetwork == UPDATE_TYPE_INCAR )
@@ -425,7 +446,7 @@ void CPlayer::BroadcastSyncData()
 			bsSync.Write(false);
 		}
 
-		pNetGame->BroadcastData(&bsSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0,m_bytePlayerID);
+		pNetGame->BroadcastDataToStreamedPlayers(&bsSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0,m_bytePlayerID);
 	}
 	else if(GetState() == PLAYER_STATE_PASSENGER &&
 		m_byteUpdateFromNetwork == UPDATE_TYPE_PASSENGER)
@@ -436,7 +457,7 @@ void CPlayer::BroadcastSyncData()
 		if (m_psSync.byteCurrentWeapon == 43) m_psSync.wKeys &= NOT_KEY_FIRE;
 		bsSync.Write((PCHAR)&m_psSync,sizeof (PASSENGER_SYNC_DATA));
 		m_psSync.wKeys = wKeys;
-		pNetGame->BroadcastData(&bsSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0,m_bytePlayerID);
+		pNetGame->BroadcastDataToStreamedPlayers(&bsSync,HIGH_PRIORITY,UNRELIABLE_SEQUENCED,0,m_bytePlayerID);
 	}
 
 	if(m_bHasAimUpdates) {
@@ -444,7 +465,7 @@ void CPlayer::BroadcastSyncData()
 		bsSync.Write((BYTE)ID_AIM_SYNC);
 		bsSync.Write(m_bytePlayerID);
 		bsSync.Write((PCHAR)&m_aimSync,sizeof(AIM_SYNC_DATA));
-		pNetGame->BroadcastData(&bsSync, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, m_bytePlayerID, TRUE, TRUE);
+		pNetGame->BroadcastDataToStreamedPlayers(&bsSync, HIGH_PRIORITY, UNRELIABLE_SEQUENCED, 0, m_bytePlayerID);
 		m_bHasAimUpdates = FALSE;
 	}
 	
@@ -453,7 +474,7 @@ void CPlayer::BroadcastSyncData()
 		bsSync.Write((BYTE)ID_TRAILER_SYNC);
 		bsSync.Write(m_bytePlayerID);
 		bsSync.Write((PCHAR)&m_trSync, sizeof (TRAILER_SYNC_DATA));
-		pNetGame->BroadcastData(&bsSync, HIGH_PRIORITY,UNRELIABLE_SEQUENCED, 0, m_bytePlayerID, TRUE);
+		pNetGame->BroadcastDataToStreamedPlayers(&bsSync, HIGH_PRIORITY,UNRELIABLE_SEQUENCED, 0, m_bytePlayerID);
 		m_bHasTrailerUpdates = FALSE;
 	}
 		
@@ -478,6 +499,8 @@ BYTE CPlayer::CheckWeapon(BYTE weapon)
 void CPlayer::StoreOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync)
 {
 	m_VehicleID = 0;
+
+	int iOldWeaponID = m_ofSync.byteCurrentWeapon;
 
 	memcpy(&m_ofSync,pofSync,sizeof(ONFOOT_SYNC_DATA));
 	
@@ -578,6 +601,7 @@ void CPlayer::StoreOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync)
 	}
 
 	CheckKeyUpdatesForScript(m_ofSync.wKeys);
+	CheckWeaponUpdatesForScript(iOldWeaponID);
 	SetState(PLAYER_STATE_ONFOOT);
 
 	if(pFilterScripts && pGameMode) {
@@ -601,6 +625,7 @@ void CPlayer::StoreInCarFullSyncData(INCAR_SYNC_DATA *picSync)
 {
 	m_VehicleID = picSync->VehicleID;
 	m_byteSeatID = 0;
+	int iOldWeaponID = m_icSync.byteCurrentWeapon;
 
 	CFilterScripts * pFilterScripts = pNetGame->GetFilterScripts();
 	CGameMode * pGameMode = pNetGame->GetGameMode();
@@ -639,6 +664,7 @@ void CPlayer::StoreInCarFullSyncData(INCAR_SYNC_DATA *picSync)
 	m_icSync.byteCurrentWeapon = CheckWeapon(m_icSync.byteCurrentWeapon);
 
 	CheckKeyUpdatesForScript(m_icSync.wKeys);
+	CheckWeaponUpdatesForScript(iOldWeaponID);
 	SetState(PLAYER_STATE_DRIVER);
 
 	if(pFilterScripts && pGameMode) {
@@ -680,6 +706,8 @@ void CPlayer::StorePassengerFullSyncData(PASSENGER_SYNC_DATA *ppsSync)
 	CFilterScripts * pFilterScripts = pNetGame->GetFilterScripts();
 	CGameMode * pGameMode = pNetGame->GetGameMode();
 
+	int iOldWeaponID = m_psSync.byteCurrentWeapon;
+
 	memcpy(&m_psSync,ppsSync,sizeof(PASSENGER_SYNC_DATA));
 	UpdatePosition(m_psSync.vecPos.X,m_psSync.vecPos.Y,m_psSync.vecPos.Z);
 
@@ -691,6 +719,7 @@ void CPlayer::StorePassengerFullSyncData(PASSENGER_SYNC_DATA *ppsSync)
 	m_byteUpdateFromNetwork = UPDATE_TYPE_PASSENGER;
 
 	CheckKeyUpdatesForScript(m_psSync.wKeys);
+	CheckWeaponUpdatesForScript(iOldWeaponID);
 	SetState(PLAYER_STATE_PASSENGER);
 
 	if(pFilterScripts && pGameMode) {
@@ -1154,6 +1183,19 @@ void CPlayer::CheckKeyUpdatesForScript(WORD wKeys)
 
 //----------------------------------------------------
 
+void CPlayer::CheckWeaponUpdatesForScript(BYTE weapon) {
+	if (pNetGame->GetWeaponName(weapon) == "") return; // Just a little way to see if it's a valid weapon.
+
+	if (weapon != GetCurrentWeapon()) {
+		if (pNetGame->GetGameMode())
+			pNetGame->GetGameMode()->OnPlayerWeaponChanged(m_bytePlayerID, weapon, GetCurrentWeapon());
+		if (pNetGame->GetFilterScripts())
+			pNetGame->GetFilterScripts()->OnPlayerWeaponChanged(m_bytePlayerID, weapon, GetCurrentWeapon());
+	}
+}
+
+//----------------------------------------------------
+
 int CPlayer::IsInRangeOfPoint(VECTOR vecPos, float fRange) {
 	fRange = fRange * fRange; // we'll use the squared distance, not the square root.    
 
@@ -1174,6 +1216,27 @@ float CPlayer::GetDistanceFromPoint(VECTOR vecPos) {
 	float fSZ = (m_vecPos.Z - vecPos.Z) * (m_vecPos.Z - vecPos.Z);
 
 	return (float)sqrt(fSX + fSY + fSZ);
+}
+
+//----------------------------------------------------
+
+void CPlayer::ShowPlayer(BYTE bytePlayerID, bool show) {
+	if (!pNetGame->GetPlayerPool()) return;
+
+	RakNet::BitStream bsData;
+	bsData.Write(bytePlayerID);
+	bsData.Write(show);
+	pNetGame->GetRakServer()->RPC(RPC_ScrShowPlayerForPlayer, &bsData, HIGH_PRIORITY, RELIABLE, 0, pNetGame->GetRakServer()->GetPlayerIDFromIndex(m_bytePlayerID), false, false);
+}
+
+//----------------------------------------------------
+
+void CPlayer::ShowVehicle(VEHICLEID vehicleID, bool show) {
+	RakNet::BitStream bsData;
+	bsData.Write(vehicleID);
+	bsData.Write(show);
+	pNetGame->GetRakServer()->RPC(RPC_ScrShowVehicleForPlayer, &bsData, HIGH_PRIORITY, RELIABLE, 0, pNetGame->GetRakServer()->GetPlayerIDFromIndex(m_bytePlayerID), false, false);
+
 }
 
 //----------------------------------------------------

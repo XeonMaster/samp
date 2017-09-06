@@ -121,6 +121,8 @@
 	#define RPC_ScrToggleVehicleMarker		"a4"
 	#define RPC_ScrMoveTextdraw				"a5"
 	#define RPC_ScrSetPlayerVisibleInScoreBoard "a6"
+	#define RPC_ScrShowPlayerForPlayer		"a7"
+	#define RPC_ScrShowVehicleForPlayer		"a8"
 
 	// netrpc (server)
 	#define RPC_ClientJoin					"xx"

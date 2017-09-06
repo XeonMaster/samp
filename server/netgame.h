@@ -144,6 +144,11 @@ public:
 							   BYTE byteExcludedPlayer,
 							   float fUseDistance );
 
+	void BroadcastDataToStreamedPlayers(RakNet::BitStream *bitStream, PacketPriority priority,
+		PacketReliability reliability,
+		char orderingStream,
+		BYTE byteExcludedPlayer);
+
 	void AdjustAimSync(RakNet::BitStream *bitStream, BYTE byteTargetPlayerID, RakNet::BitStream *adjbitStream);
 
 	// Packet Handlers

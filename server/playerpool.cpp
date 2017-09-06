@@ -27,10 +27,9 @@ CPlayerPool::CPlayerPool()
 
 CPlayerPool::~CPlayerPool()
 {	
-	for(BYTE bytePlayerID = 0; bytePlayerID < MAX_PLAYERS; bytePlayerID++) {
-		Delete(bytePlayerID,0);
+	for (BYTE bytePlayerID = 0; bytePlayerID < MAX_PLAYERS; bytePlayerID++) {
+		Delete(bytePlayerID, 0);
 	}
-	m_iPlayerCount = 0;
 	m_iPlayerCount = -1;
 }
 

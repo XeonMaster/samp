@@ -299,4 +299,5 @@ forward OnPlayerStreamIn(playerid, forplayerid);
 forward OnPlayerStreamOut(playerid, forplayerid);
 forward OnVehicleStreamIn(vehicleid, forplayerid);
 forward OnVehicleStreamOut(vehicleid, forplayerid);
+forward OnPlayerWeaponChanged(playerid, oldweaponid, newweaponid);
 forward OnPlayerUpdate(playerid); // called for every player network update. don't execute too much code in here. return 0 to prevent replication to other clients.

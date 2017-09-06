@@ -1252,7 +1252,6 @@ static cell AMX_NATIVE_CALL n_SetVehiclePos(AMX *amx, cell *params)
 // native SendClientMessage(playerid, color, const message[])
 static cell AMX_NATIVE_CALL n_SendClientMessage(AMX *amx, cell *params)
 {
-	CHECK_PARAMS(3);
 	if (!pNetGame->GetPlayerPool()->GetSlotState(params[1])) return 0;
 	PlayerID pidPlayer = pNetGame->GetRakServer()->GetPlayerIDFromIndex(params[1]);
 	int len;
@@ -1314,7 +1313,6 @@ static cell AMX_NATIVE_CALL n_SendPlayerMessageToAll(AMX *amx, cell *params)
 // native SendClientMessageToAll(color, const message[])
 static cell AMX_NATIVE_CALL n_SendClientMessageToAll(AMX *amx, cell *params)
 {
-	
 	int len;
 	char* szMessage = format_amxstring(amx, params, 3, len);
 	pNetGame->SendClientMessageToAll(params[1],szMessage);

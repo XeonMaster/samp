@@ -18,7 +18,7 @@ CVehiclePool::CVehiclePool()
 		m_bVehicleSlotState[VehicleID] = FALSE;
 		m_pVehicles[VehicleID] = NULL;
 	}
-	m_iVehiclePoolCount = -1;
+	m_iVehiclePoolCount = 0;
 }
 
 //----------------------------------------------------

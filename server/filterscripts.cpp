@@ -1226,6 +1226,26 @@ int CFilterScripts::OnVehicleStreamOut(cell vehicleid, cell forplayerid) {
 
 	return (int)ret;
 }
+
+//----------------------------------------------------------------------------------
+// forward OnPlayerWeaponChanged(playerid, oldweaponid, newweaponid);
+
+int CFilterScripts::OnPlayerWeaponChanged(cell playerid, cell oldweaponid, cell newweaponid) {
+	int idx;
+	cell ret = 1;
+	for (int i = 0; i < MAX_FILTER_SCRIPTS; i++) {
+		if (m_pFilterScripts[i]) {
+			if (!amx_FindPublic(m_pFilterScripts[i], "OnPlayerWeaponChanged", &idx)) {
+				amx_Push(m_pFilterScripts[i], newweaponid);
+				amx_Push(m_pFilterScripts[i], oldweaponid);
+				amx_Push(m_pFilterScripts[i], playerid);
+				amx_Exec(m_pFilterScripts[i], &ret, idx);
+			}
+		}
+	}
+	return (int)ret;
+}
+
 //----------------------------------------------------------------------------------
 // forward OnPlayerUpdate(playerid)
 
