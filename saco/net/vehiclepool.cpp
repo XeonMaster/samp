@@ -276,8 +276,7 @@ void CVehiclePool::Process()
 #endif */
 				// Remove or Add vehicles as they leave/enter a radius around the player
 				
-				if( pVehicle->IsAdded()
-					&& m_byteVirtualWorld[x] == localVW) {
+				if( pVehicle->IsAdded() ){
 
 					pVehicle->Add();
 					
