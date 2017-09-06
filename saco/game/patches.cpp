@@ -553,6 +553,11 @@ void ApplyInGamePatches()
 	UnFuck(0x63ADC8,6);
 	memset((PVOID)0x63ADC8,0x90,6);
 
+	UnFuck(0x745BC9, 1);
+	*(WORD *)0x745BC9 = 0x9090;
+	UnFuck(0x7459E1, 1);
+	*(WORD *)0x7459E1 = 0x9090;
+
 	// Rest of the stuff
 	RelocateScanListHack();
 	

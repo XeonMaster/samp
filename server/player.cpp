@@ -500,7 +500,7 @@ void CPlayer::StoreOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync)
 {
 	m_VehicleID = 0;
 
-	int iOldWeaponID = m_ofSync.byteCurrentWeapon;
+	BYTE iOldWeaponID = m_ofSync.byteCurrentWeapon;
 
 	memcpy(&m_ofSync,pofSync,sizeof(ONFOOT_SYNC_DATA));
 	
@@ -625,7 +625,7 @@ void CPlayer::StoreInCarFullSyncData(INCAR_SYNC_DATA *picSync)
 {
 	m_VehicleID = picSync->VehicleID;
 	m_byteSeatID = 0;
-	int iOldWeaponID = m_icSync.byteCurrentWeapon;
+	BYTE iOldWeaponID = m_icSync.byteCurrentWeapon;
 
 	CFilterScripts * pFilterScripts = pNetGame->GetFilterScripts();
 	CGameMode * pGameMode = pNetGame->GetGameMode();
@@ -706,7 +706,7 @@ void CPlayer::StorePassengerFullSyncData(PASSENGER_SYNC_DATA *ppsSync)
 	CFilterScripts * pFilterScripts = pNetGame->GetFilterScripts();
 	CGameMode * pGameMode = pNetGame->GetGameMode();
 
-	int iOldWeaponID = m_psSync.byteCurrentWeapon;
+	BYTE iOldWeaponID = m_psSync.byteCurrentWeapon;
 
 	memcpy(&m_psSync,ppsSync,sizeof(PASSENGER_SYNC_DATA));
 	UpdatePosition(m_psSync.vecPos.X,m_psSync.vecPos.Y,m_psSync.vecPos.Z);
