@@ -147,10 +147,11 @@ void Chat(RPCParameters *rpcParams)
 
 	ReplaceBadChars((char *)szText);
 
-	logprintf("[chat] [%s]: %s",
-		pPool->GetPlayerName(pRak->GetIndexFromPlayerID(sender)),
-		szText);
-
+	if (pConsole->GetIntVariable("chatlogging")) 
+		logprintf("[chat] [%s]: %s",
+			pPool->GetPlayerName(pRak->GetIndexFromPlayerID(sender)),
+			szText);
+	
 	BYTE bytePlayerID = pRak->GetIndexFromPlayerID(sender);
 
 #ifdef RAKRCON

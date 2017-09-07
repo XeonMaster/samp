@@ -290,6 +290,10 @@ void CPlayer::BroadcastSyncData()
 			bsSync.Write(false);
 		}
 
+		if (m_ofSync.byteCurrentWeapon == WEAPON_NIGHTVISION || m_ofSync.byteCurrentWeapon == WEAPON_THERMALVISION && m_ofSync.wKeys & KEY_FIRE) {
+			m_ofSync.wKeys &= ~(KEY_FIRE); // Remove KEY_FIRE so we don't get the vision bug!
+		}
+
 		// GENERAL KEYSET
 		bsSync.Write(m_ofSync.wKeys);
 		
@@ -317,10 +321,6 @@ void CPlayer::BroadcastSyncData()
 	
 		bsSync.Write(byteSyncHealthArmour);
 	
-		if (m_ofSync.byteCurrentWeapon == WEAPON_NIGHTVISION || m_ofSync.byteCurrentWeapon == WEAPON_THERMALVISION && m_ofSync.wKeys & KEY_FIRE) {
-			m_ofSync.wKeys &= ~(KEY_FIRE); // Remove KEY_FIRE so we don't get the vision bug!
-		}
-
 		// CURRENT WEAPON
 		bsSync.Write(m_ofSync.byteCurrentWeapon);
 

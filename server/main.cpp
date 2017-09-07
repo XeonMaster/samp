@@ -232,6 +232,7 @@ int main (int argc, char** argv)
 	bool bEnableAC = false;
 	bool bAllowQuery = true;
 	float stream_distance = 200.0f;
+	int iChatLogging = 1;
 
 	// Open the log file
 	LoadLogFile();
@@ -325,6 +326,7 @@ int main (int argc, char** argv)
 	pConsole->AddVariable("instagib", CON_VARTYPE_BOOL, CON_VARFLAG_RULE, &bEnableInstagib, ServerInstagibChanged);
 	pConsole->AddVariable("myriad", CON_VARTYPE_BOOL, 0, &bGameMod);
 	pConsole->AddVariable("stream_distance", CON_VARTYPE_FLOAT, 0, &stream_distance);
+	pConsole->AddVariable("chatlogging", CON_VARTYPE_INT, 0, &iChatLogging);
 
 	// Add 16 gamemode variables.
 	int x=0;
