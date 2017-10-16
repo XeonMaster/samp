@@ -964,6 +964,25 @@ int CGameMode::OnPlayerWeaponChanged(cell playerid, cell oldweaponid, cell newwe
 }
 
 //----------------------------------------------------------------------------------
+// forward OnRconLoginAttempt(ip[], password[], success, playerid = -1);
+
+int CGameMode::OnRconLoginAttempt(char *ip, char *password, cell success, cell playerid) {
+	CHECK_INIT();
+	int idx;
+	cell ret = 1;
+	if (!amx_FindPublic(&m_amx, "OnRconLoginAttempt", &idx)) {
+		cell amx_addr, *phys_addr;
+
+		amx_Push(&m_amx, playerid);
+		amx_Push(&m_amx, success);
+		amx_PushString(&m_amx, &amx_addr, &phys_addr, password, 0, 0);
+		amx_PushString(&m_amx, &amx_addr, &phys_addr, ip, 0, 0);
+		amx_Exec(&m_amx, &ret, idx);
+	}
+	return (int)ret;
+}
+
+//----------------------------------------------------------------------------------
 // forward OnPlayerUpdate(playerid)
 
 int CGameMode::OnPlayerUpdate(cell playerid)

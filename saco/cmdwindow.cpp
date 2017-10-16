@@ -52,6 +52,7 @@ void CCmdWindow::ResetDialogControls(CDXUTDialog *pGameUI)
 		m_pEditControl->SetCaretColor(D3DCOLOR_ARGB(255, 64, 64, 64));
 		m_pEditControl->SetSelectedTextColor(D3DCOLOR_ARGB(255, 255, 255, 255));
 		m_pEditControl->SetSelectedBackColor(D3DCOLOR_ARGB(255, 40, 72, 72));
+		m_pEditControl->SetVisible(false);
 	}
 }
 

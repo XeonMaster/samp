@@ -394,6 +394,43 @@ static cell AMX_NATIVE_CALL n_GetVehicleModel(AMX *amx, cell *params)
 }
 
 //----------------------------------------------------------------------------------
+// native SetVehicleVelocity(vehicleid, Float:X, Float:Y, Float:Z);
+
+static cell AMX_NATIVE_CALL n_SetVehicleVelocity(AMX *amx, cell *params) {
+	if (!pNetGame || !pNetGame->GetVehiclePool()->GetSlotState(params[1]) || pNetGame->GetVehiclePool()->GetAt(params[1])->m_byteDriverID == INVALID_ID) return 0;
+
+	RakNet::BitStream bsData;
+	bsData.Write(amx_ctof(params[2]));
+	bsData.Write(amx_ctof(params[3]));
+	bsData.Write(amx_ctof(params[4]));
+
+	PlayerID pID = pNetGame->GetRakServer()->GetPlayerIDFromIndex(pNetGame->GetVehiclePool()->GetAt(params[1])->m_byteDriverID);
+
+	pNetGame->GetRakServer()->RPC(RPC_ScrSetVehicleVelocity, &bsData, HIGH_PRIORITY, RELIABLE, 0, pID, false, false);
+	return 1;
+}
+
+//----------------------------------------------------------------------------------
+// native GetVehicleVelocity(playerid, &Float:x, &Float:y, &Float:z);
+
+static cell AMX_NATIVE_CALL n_GetVehicleVelocity(AMX *amx, cell *params) {
+	if (!pNetGame || !pNetGame->GetVehiclePool()->GetSlotState(params[1])) return 0;
+
+	CPlayer *pDriver = pNetGame->GetPlayerPool()->GetAt(pNetGame->GetVehiclePool()->GetAt(params[1])->m_byteDriverID);
+	if (!pDriver) return 0;
+
+	cell* cptr;
+	amx_GetAddr(amx, params[2], &cptr);
+	*cptr = pDriver->GetInCarSyncData()->vecMoveSpeed.X;
+	amx_GetAddr(amx, params[3], &cptr);
+	*cptr = pDriver->GetInCarSyncData()->vecMoveSpeed.Y;
+	amx_GetAddr(amx, params[4], &cptr);
+	*cptr = pDriver->GetInCarSyncData()->vecMoveSpeed.Z;
+
+	return 1;
+}
+
+//----------------------------------------------------------------------------------
 // native ToggleVehicleMarker(vehicleid, bool:toggle = true);
 static cell AMX_NATIVE_CALL n_ToggleVehicleMarker(AMX *amx, cell *params) {
 	CHECK_PARAMS(2);
@@ -1037,6 +1074,7 @@ static cell AMX_NATIVE_CALL n_PutPlayerInVehicle(AMX *amx, cell *params)
 
 	if(pNetGame->GetPlayerPool()->GetSlotState(params[1]) && pNetGame->GetVehiclePool()->GetSlotState((VEHICLEID)params[2]))
 	{
+		pNetGame->GetPlayerPool()->GetAt(params[1])->ShowVehicle(params[2], true);
 		RakNet::BitStream bsParams;
 		bsParams.Write((VEHICLEID)params[2]);	// vehicleid
 		bsParams.Write((BYTE)params[3]);	// seatid
@@ -1157,7 +1195,7 @@ static cell AMX_NATIVE_CALL n_CreateVehicle(AMX *amx, cell *params)
 
 	if (VehicleID != 0xFFFF)
 	{
-		for(int x = 0; x < MAX_PLAYERS;x++) {	
+		for(int x = 0; x <= pNetGame->GetPlayerPool()->GetPlayerPoolCount();x++) {	
 			if (pNetGame->GetPlayerPool()->GetSlotState(x)) 	{
 				pNetGame->GetVehiclePool()->GetAt(VehicleID)->SpawnForPlayer(x);
 			}
@@ -4416,6 +4454,39 @@ static cell AMX_NATIVE_CALL n_IsPlayerStreamedInForPlayer(AMX *amx, cell *params
 }
 
 //----------------------------------------------------------------------------------
+// native SetPlayerVelocity(playerid, Float:X, Float:Y, Float:Z);
+
+static cell AMX_NATIVE_CALL n_SetPlayerVelocity(AMX *amx, cell *params) {
+	if (!pNetGame || !pNetGame->GetPlayerPool()->GetSlotState(params[1])) return 0;
+	
+	RakNet::BitStream bsData;
+	bsData.Write(amx_ctof(params[2]));
+	bsData.Write(amx_ctof(params[3]));
+	bsData.Write(amx_ctof(params[4]));
+
+	pNetGame->GetRakServer()->RPC(RPC_ScrSetPlayerVelocity, &bsData, HIGH_PRIORITY, RELIABLE, 0, pNetGame->GetRakServer()->GetPlayerIDFromIndex(params[1]), false, false);
+	return 1;
+}
+
+//----------------------------------------------------------------------------------
+// native GetPlayerVelocity(playerid, &Float:x, &Float:y, &Float:z);
+
+static cell AMX_NATIVE_CALL n_GetPlayerVelocity(AMX *amx, cell *params) {
+	if (!pNetGame || !pNetGame->GetPlayerPool()->GetSlotState(params[1])) return 0;
+
+	CPlayer *pPlayer = pNetGame->GetPlayerPool()->GetAt(params[1]);
+	cell* cptr;
+	amx_GetAddr(amx, params[2], &cptr);
+	*cptr = pPlayer->GetOnFootSyncData()->vecMoveSpeed.X;
+	amx_GetAddr(amx, params[3], &cptr);
+	*cptr = pPlayer->GetOnFootSyncData()->vecMoveSpeed.Y;
+	amx_GetAddr(amx, params[4], &cptr);
+	*cptr = pPlayer->GetOnFootSyncData()->vecMoveSpeed.Z;
+
+	return 1;
+}
+
+//----------------------------------------------------------------------------------
 AMX_NATIVE_INFO custom_Natives[] =
 {
 	// Util
@@ -4575,6 +4646,8 @@ AMX_NATIVE_INFO custom_Natives[] =
 	{ "DestroyPlayerPickup",	n_DestroyPlayerPickup },
 	{ "IsPlayerInRangeOfPoint", n_IsPlayerInRangeOfPoint },
 	{ "IsPlayerStreamedInForPlayer", n_IsPlayerStreamedInForPlayer },
+	{ "SetPlayerVelocity", n_SetPlayerVelocity },
+	{ "GetPlayerVelocity", n_GetPlayerVelocity },
 
 	// Vehicle
 	{ "CreateVehicle",			n_CreateVehicle },
@@ -4600,6 +4673,8 @@ AMX_NATIVE_INFO custom_Natives[] =
 	{ "GetVehicleTrailer",		n_GetVehicleTrailer },
 	{ "SetVehicleNumberPlate",	n_SetVehicleNumberPlate },
 	{ "GetVehicleModel",		n_GetVehicleModel },
+	{ "SetVehicleVelocity", n_SetVehicleVelocity },
+	{ "GetVehicleVelocity", n_GetVehicleVelocity },
 
 	{ "SetVehicleVirtualWorld",		n_SetVehicleVirtualWorld },
 	{ "GetVehicleVirtualWorld",		n_GetVehicleVirtualWorld },

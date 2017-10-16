@@ -19,7 +19,6 @@ CPlayerPool::CPlayerPool()
 		m_bPlayerSlotState[bytePlayerID] = FALSE;
 		m_pPlayers[bytePlayerID] = NULL;
 	}
-	m_iPlayerCount = 0;
 	m_iPlayerPoolCount = -1;
 }
 
@@ -30,7 +29,7 @@ CPlayerPool::~CPlayerPool()
 	for (BYTE bytePlayerID = 0; bytePlayerID < MAX_PLAYERS; bytePlayerID++) {
 		Delete(bytePlayerID, 0);
 	}
-	m_iPlayerCount = -1;
+	m_iPlayerPoolCount = -1;
 }
 
 //----------------------------------------------------
@@ -86,8 +85,8 @@ BOOL CPlayerPool::New(BYTE bytePlayerID, PCHAR szPlayerName, int uResolution[2])
 			pGameMode->OnPlayerConnect(bytePlayerID);
 		}
 		
-		m_iPlayerCount++;
-		if (bytePlayerID > m_iPlayerPoolCount) m_iPlayerCount = bytePlayerID;
+		m_iPlayerPoolCount++;
+		if (bytePlayerID > m_iPlayerPoolCount) m_iPlayerPoolCount = bytePlayerID;
 
 		return TRUE;
 	}
@@ -138,7 +137,6 @@ BOOL CPlayerPool::Delete(BYTE bytePlayerID, BYTE byteReason)
 		UNASSIGNED_PLAYER_ID, true, false);
 #endif
 
-	m_iPlayerCount--;
 	if (bytePlayerID == m_iPlayerPoolCount) {
 		int old_pool = m_iPlayerPoolCount;
 		m_iPlayerPoolCount = -1;

@@ -1298,7 +1298,7 @@ void cmdVModels(PCHAR szCmd)
 
 		while(x!=MAX_VEHICLES) {
 			if(pVehiclePool->GetSlotState(x)) {
-				iVehicleType = pVehiclePool->m_SpawnInfo[x].iVehicleType;
+				iVehicleType = pVehiclePool->m_pVehicles[x]->m_SpawnInfo.iVehicleType;
 				iCount[iVehicleType-400]++;
 				iTotalVehicles++;
 			}

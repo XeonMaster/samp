@@ -37,7 +37,6 @@ private:
 	DWORD	m_dwPlayerAmmo[MAX_PLAYERS];
 	BOOL	m_bIsAnAdmin[MAX_PLAYERS];
 	BYTE	m_byteVirtualWorld[MAX_PLAYERS];
-	int		m_iPlayerCount;
 	int		m_iPlayerPoolCount;
 
 public:
@@ -125,7 +124,6 @@ public:
 	float GetDistanceSquaredFromPlayerToPlayer(BYTE bytePlayer1, BYTE bytePlayer2);
 	BOOL  IsNickInUse(PCHAR szNick, BYTE bytePlayerID = -1);
 
-	int GetPlayerCount() { return m_iPlayerCount; };
 	int GetPlayerPoolCount() { return m_iPlayerPoolCount; };
 
 	void DeactivateAll();

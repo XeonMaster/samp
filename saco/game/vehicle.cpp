@@ -42,6 +42,7 @@ CVehicle::CVehicle( int iType, float fPosX, float fPosY,
 		(iType != TRAIN_FREIGHT) &&
 		(iType != TRAIN_TRAM)) {
 
+		
 		// NORMAL VEHICLE
 		if(!pGame->IsModelLoaded(iType)) {
 			pGame->RequestModel(iType);
@@ -66,7 +67,9 @@ CVehicle::CVehicle( int iType, float fPosX, float fPosY,
 		dwLastCreatedVehicleID = dwRetID;
 		m_pVehicle->dwDoorsLocked = 0;
 		m_bIsLocked = FALSE;
-		
+		m_pVehicle->dwTrailer = NULL;
+		m_pVehicle->pDriver = NULL;
+
 		Remove(); // They'll be added manually during pool processing.
 		pGame->RemoveModel(iType);						
 	}
@@ -132,7 +135,8 @@ CVehicle::CVehicle( int iType, float fPosX, float fPosY,
 	m_dwTimeSinceLastDriven = GetTickCount();
 	m_bDoorsLocked = FALSE;
 	m_bShowMarker = bShowMarker;
-	m_pVehicle->pDriver = NULL;
+	memset(m_pVehicle->pPassengers, 0, sizeof(m_pVehicle->pPassengers));
+	m_pVehicle->pPassengers[6] = NULL; // Apparently ^ doesn't like index 6.
 }
 
 //-----------------------------------------------------------
@@ -754,8 +758,8 @@ void CVehicle::RemoveEveryoneFromVehicle()
 		ScriptCommand( &remove_actor_from_car_and_put_at, iPlayerID, fPosX, fPosY, fPosZ + 2 );
 	}
 
-	for (int i = 0; i < 7; i++) {
-		if (m_pVehicle->pPassengers[i] != NULL) {
+	for (int i = 1; i < 7; i++) {
+		if (m_pVehicle->pPassengers[i] != NULL && m_pVehicle->pPassengers[i] != (PED_TYPE*)0x0000ffff) {
 			iPlayerID = GamePool_Ped_GetIndex( m_pVehicle->pPassengers[i] );
 			ScriptCommand( &remove_actor_from_car_and_put_at, iPlayerID, fPosX, fPosY, fPosZ + 2 );
 		}

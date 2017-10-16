@@ -21,6 +21,19 @@ enum eLandingGearState
 	LGS_DOWN = 2,
 };
 
+#pragma pack(1)
+typedef struct _VEHICLE_SPAWN_INFO
+{
+	int iVehicleType;
+	VECTOR vecPos;
+	float fRotation;
+	int iColor1;
+	int iColor2;
+	int iObjective;
+	int iDoorsLocked;
+	int iInterior;
+} VEHICLE_SPAWN_INFO;
+
 class CVehicle : public CEntity
 {
 public:
@@ -99,7 +112,13 @@ public:
 	DWORD		m_dwTimeSinceLastDriven;
 	BOOL		m_bHasBeenDriven;
 	BOOL		m_bShowMarker;
+	BOOL		m_bIsActive;
+	BOOL		m_bIsWasted;
+	VEHICLE_SPAWN_INFO m_SpawnInfo;
 
+	int			m_iRespawnDelay;
+	BYTE		m_byteVirtualWorld;
+	CHAR		m_charNumberPlate[9];
 	CVehicle*   m_pTrailer;
 };
 

@@ -80,6 +80,10 @@ native ClearAnimations(playerid);
 native GetPlayerSpecialAction(playerid);
 native SetPlayerSpecialAction(playerid,actionid);
 
+// Player Velocity
+native SetPlayerVelocity(playerid, Float:x, Float:y, Float:z);
+native GetPlayerVelocity(playerid, &Float:x, &Float:y, &Float:z);
+
 // Player map commands
 native SetPlayerCheckpoint(playerid, Float:x, Float:y, Float:z, Float:size);
 native DisablePlayerCheckpoint(playerid);

@@ -335,6 +335,8 @@ int ProcessQueryPacket(unsigned int binaryAddress, unsigned short port, char* da
 							// Execute the command
 							pConsole->Execute(szCommand);
 							bRconSocketReply = FALSE;
+							pNetGame->GetFilterScripts()->OnRconLoginAttempt(inet_ntoa(in), szPassword, 0);
+							pNetGame->GetGameMode()->OnRconLoginAttempt(inet_ntoa(in), szPassword, 0);
 						}
 
 						free(szCommand);
@@ -346,6 +348,8 @@ int ProcessQueryPacket(unsigned int binaryAddress, unsigned short port, char* da
 						bRconSocketReply = TRUE;
 						RconSocketReply("Invalid RCON password.");
 						bRconSocketReply = FALSE;
+						pNetGame->GetFilterScripts()->OnRconLoginAttempt(inet_ntoa(in), szPassword, 0);
+						pNetGame->GetGameMode()->OnRconLoginAttempt(inet_ntoa(in), szPassword, 0);
 					}
 					free(szPassword);
 

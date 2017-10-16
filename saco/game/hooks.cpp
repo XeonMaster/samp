@@ -508,6 +508,9 @@ NUDE AllVehicles_ProcessControl_Hook()
 
 	byteInternalPlayer = *(BYTE *)0xB7CD74;
 	
+	if (_pVehicle->pDriver == (PED_TYPE*)0xA0A1401)
+		_pVehicle->pDriver = NULL;
+
 	if( (_pVehicle->pDriver) && (_pVehicle->pDriver->dwPedType == 0) &&
 		(_pVehicle->pDriver != GamePool_FindPlayerPed()) &&
 		(byteInternalPlayer==0) ) // not player's car
@@ -1200,18 +1203,20 @@ void Fallen_Teleport(float x, float y, float z) {
 
 NUDE CGame__RemoveFallenPeds() {
 	static float mX, mY, mZ;
-
+	static PED_TYPE *pPed;
+	 
 	_asm mov edx, [eax]
 	_asm mov mX, edx // Get X coord from node.
 	_asm mov edx, [eax+4]
 	_asm mov mY, edx // Get Y coord from node.
 	_asm mov edx, [eax+8]
 	_asm mov mZ, edx // Get Z coord from node.
-	
-	if (pNetGame && pNetGame->GetPlayerPool()) {
+	_asm mov edx, esi
+	_asm mov pPed, edx // Get actor to compare local player actor. If its the same, teleport and send update, else don't.
+
+	if (pNetGame && pNetGame->GetPlayerPool() && pPed == pNetGame->GetPlayerPool()->GetLocalPlayer()->GetPlayerPed()->GetGtaActor()) {
 		Fallen_Teleport(mX, mY, mZ);
 		pNetGame->GetPlayerPool()->GetLocalPlayer()->GetPlayerPed()->TeleportTo(mX, mY, mZ);
-		pChatWindow->AddDebugMessage("CPlayerPed::TeleportTo(%f, %f, %f) : CGame_RemoveFallenPeds", mX, mY, mZ);
 	}
 
 	_asm retn 16 // Spmn: stack cleanup
@@ -1225,11 +1230,10 @@ DWORD CVehicle__OnPayNSpray__JMP = 0x44B229;
 extern void SendScmEvent(int iEventType, DWORD dwParam1, DWORD dwParam2, DWORD dwParam3);
 
 NUDE CVehicle__OnPayNSpray() {
-	
+
 	_asm mov primaryColour, al
 	_asm mov secondaryColour, dl
 	_asm push eax
-	
 	_asm pushad
 
 	iVehicleID = pVehiclePool->FindIDFromGtaPtr(pLocalPlayer->GetPlayerPed()->GetGtaVehicle());

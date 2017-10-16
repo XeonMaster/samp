@@ -37,10 +37,10 @@ CChatWindow::CChatWindow(IDirect3DDevice9 *pD3DDevice, ID3DXFont *pFont)
 	m_pD3DFont->DrawText(0,"Y",-1,&rectSize,DT_CALCRECT|DT_SINGLELINE|DT_LEFT,0xFF000000);
 	m_lFontSizeY = rectSize.bottom - rectSize.top;
 
-	m_dwChatTextColor = D3DCOLOR_ARGB(255,255,255,255);
-	m_dwChatInfoColor = D3DCOLOR_ARGB(255,0,200,200);
-	m_dwChatDebugColor = D3DCOLOR_ARGB(255,244,164,25);
-	m_dwChatBackgroundColor = D3DCOLOR_ARGB(255,0,0,0);
+	m_dwChatTextColor = -1;
+	m_dwChatInfoColor = 0xFF88AA62;
+	m_dwChatDebugColor = 0xFFA9C4E4;
+	m_dwChatBackgroundColor = 0;
 }
 
 //----------------------------------------------------
@@ -54,8 +54,6 @@ void CChatWindow::ResetDialogControls(CDXUTDialog *pGameUI)
 	m_pGameUI = pGameUI;
 
 	if(pGameUI) {
-		//pGameUI->AddEditBox(IDC_CHATBACK,"",5,5,420,170,true,&m_pEditBackground);
-
 		m_pScrollBar = new CDXUTScrollBar(pGameUI);        
 		pGameUI->AddControl(m_pScrollBar);
 		m_pScrollBar->SetVisible(true);
@@ -65,20 +63,6 @@ void CChatWindow::ResetDialogControls(CDXUTDialog *pGameUI)
 		m_pScrollBar->SetTrackRange(0,(MAX_MESSAGES-DISP_MESSAGES)-1);
 		m_pScrollBar->SetPageSize(5);
 		m_pScrollBar->ShowItem(MAX_MESSAGES-1);
-
-		/*
-		m_pEditBackground->GetElement(0)->TextureColor.Init(D3DCOLOR_ARGB( 170, 20, 20, 20 ));
-		m_pEditBackground->GetElement(1)->TextureColor.Init(D3DCOLOR_ARGB( 200, 0, 0, 0 ));
-		m_pEditBackground->GetElement(2)->TextureColor.Init(D3DCOLOR_ARGB( 200, 0, 0, 0 ));
-		m_pEditBackground->GetElement(3)->TextureColor.Init(D3DCOLOR_ARGB( 200, 0, 0, 0 ));
-		m_pEditBackground->GetElement(4)->TextureColor.Init(D3DCOLOR_ARGB( 200, 0, 0, 0 ));
-		m_pEditBackground->GetElement(5)->TextureColor.Init(D3DCOLOR_ARGB( 200, 0, 0, 0 ));
-		m_pEditBackground->GetElement(6)->TextureColor.Init(D3DCOLOR_ARGB( 200, 0, 0, 0 ));
-		m_pEditBackground->GetElement(7)->TextureColor.Init(D3DCOLOR_ARGB( 200, 0, 0, 0 ));
-		m_pEditBackground->GetElement(8)->TextureColor.Init(D3DCOLOR_ARGB( 200, 0, 0, 0 ));
-		m_pEditBackground->SetEnabled(false);
-		m_pEditBackground->SetVisible(true);*/
-
 	}
 }
 
@@ -140,7 +124,7 @@ void CChatWindow::Draw()
 	rect.bottom		= 110;
 	rect.right		= 550;
 
-	if(!m_iEnabled || m_iCurrentPage == 1) {
+	if(!m_iEnabled) {
 		m_pScrollBar->SetVisible(false);
 	} else {
 		m_pScrollBar->SetVisible(true);
@@ -170,7 +154,7 @@ void CChatWindow::Draw()
 					if (i) {
 						m_pD3DFont->DrawText(0, m_ChatWindowEntries[iMessageAt].szNick, -1, &rectSize, DT_CALCRECT | DT_LEFT, 0xFF000000);
 						RenderText(m_ChatWindowEntries[iMessageAt].szNick, rect, m_ChatWindowEntries[iMessageAt].dwNickColor);
-						rect.left = m_bTimestamp ? rect.left + 35 + (rectSize.right - rectSize.left) : 35 + (rectSize.right - rectSize.left);
+						rect.left = m_bTimestamp ? rect.left + (rectSize.right - rectSize.left) : 35 + (rectSize.right - rectSize.left);
 					}
 
 					RenderText(m_ChatWindowEntries[iMessageAt].szMessage,rect,m_ChatWindowEntries[iMessageAt].dwTextColor);

@@ -1247,6 +1247,28 @@ int CFilterScripts::OnPlayerWeaponChanged(cell playerid, cell oldweaponid, cell 
 }
 
 //----------------------------------------------------------------------------------
+// forward OnRconLoginAttempt(ip[], password[], success, playerid = -1);
+
+int CFilterScripts::OnRconLoginAttempt(char *ip, char *password, cell success, cell playerid) {
+	int idx;
+	cell ret = 1;
+	for (int i = 0; i < MAX_FILTER_SCRIPTS; i++) {
+		if (m_pFilterScripts[i]) {
+			if (!amx_FindPublic(m_pFilterScripts[i], "OnRconLoginAttempt", &idx)) {
+				cell amx_addr, *phys_addr;
+				
+				amx_Push(m_pFilterScripts[i], playerid);
+				amx_Push(m_pFilterScripts[i], success);
+				amx_PushString(m_pFilterScripts[i], &amx_addr, &phys_addr, password, 0, 0);
+				amx_PushString(m_pFilterScripts[i], &amx_addr, &phys_addr, ip, 0, 0);
+				amx_Exec(m_pFilterScripts[i], &ret, idx);
+			}
+		}
+	}
+	return (int)ret;
+}
+
+//----------------------------------------------------------------------------------
 // forward OnPlayerUpdate(playerid)
 
 int CFilterScripts::OnPlayerUpdate(cell playerid)

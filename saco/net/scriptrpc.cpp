@@ -219,15 +219,16 @@ void ScrPutPlayerInVehicle(RPCParameters *rpcParams)
 	bsData.Read(seatid);
 
 	CPlayerPool *pPlayerPool = pNetGame->GetPlayerPool();
-	int iVehicleIndex = pNetGame->GetVehiclePool()->FindGtaIDFromID(vehicleid);
 	CVehicle *pVehicle = pNetGame->GetVehiclePool()->GetAt(vehicleid);
+	
+	
 
-	if(iVehicleIndex && pVehicle) 
+	if(pVehicle) 
 	{
+		int iVehicleIndex = pNetGame->GetVehiclePool()->FindGtaIDFromID(vehicleid);
 		CPlayerPed *pPed = pPlayerPool->GetLocalPlayer()->GetPlayerPed();
-		if(pPed) 
+		if(pPed && iVehicleIndex ) 
 		{
-//			pPed->Add(); pVehicle->Add(); // disable for test // если откл то нет бага с управлением 2м тачками
 			pPed->PutDirectlyInVehicle(iVehicleIndex, seatid);
 		}
 	}
@@ -1046,7 +1047,7 @@ void ScrNumberPlate(RPCParameters *rpcParams)
 	
 	bsData.Read(Vehicle);
 	bsData.Read(cNumberPlate, 9);
-	strcpy(pNetGame->GetVehiclePool()->m_charNumberPlate[Vehicle], cNumberPlate);
+	strcpy(pNetGame->GetVehiclePool()->m_pVehicles[Vehicle]->m_charNumberPlate, cNumberPlate);
 }
 
 //----------------------------------------------------
@@ -1701,10 +1702,60 @@ void ScrShowVehicleForPlayer(RPCParameters *rpcParams) {
 
 	if (!pNetGame->GetVehiclePool()->GetSlotState(vehicleID)) return;
 	CVehicle *pVehicle = pNetGame->GetVehiclePool()->GetAt(vehicleID);
-	if (toggle)
+	if (toggle) {
 		pVehicle->Add();
+	} 
 	else
-		pVehicle->Remove();
+		pVehicle->~CVehicle();
+}
+
+//----------------------------------------------------
+
+void ScrSetPlayerVelocity(RPCParameters* rpcParams)
+{
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	RakNet::BitStream bsData((unsigned char*)Data, (iBitLength / 8) + 1, false);
+
+	VECTOR vecMoveSpeed;
+
+	bsData.Read(vecMoveSpeed.X);
+	bsData.Read(vecMoveSpeed.Y);
+	bsData.Read(vecMoveSpeed.Z);
+
+	CPlayerPed* pPlayerPed = pGame->FindPlayerPed();
+
+	if (pPlayerPed)
+	{
+		if (pPlayerPed->IsOnGround())
+		{
+			DWORD dwStateFlags = pPlayerPed->GetStateFlags();
+			dwStateFlags ^= 3; // Make the game think the ped is off the ground so SetMoveSpeed works
+			pPlayerPed->SetStateFlags(dwStateFlags);
+		}
+
+		pPlayerPed->SetMoveSpeedVector(vecMoveSpeed);
+	}
+}
+
+//----------------------------------------------------
+
+void ScrSetVehicleVelocity(RPCParameters *rpcParams) {
+	PCHAR Data = reinterpret_cast<PCHAR>(rpcParams->input);
+	int iBitLength = rpcParams->numberOfBitsOfData;
+	RakNet::BitStream bsData((unsigned char*)Data, (iBitLength / 8) + 1, false);
+	VECTOR vecMoveSpeed;
+	bsData.Read(vecMoveSpeed.X);
+	bsData.Read(vecMoveSpeed.Y);
+	bsData.Read(vecMoveSpeed.Z);
+	CVehiclePool* pVehiclePool = pNetGame->GetVehiclePool();
+	CPlayerPed* pPlayerPed = pGame->FindPlayerPed();
+
+	if (!pPlayerPed) return;
+
+	CVehicle* pVehicle = pVehiclePool->GetAt(pVehiclePool->FindIDFromGtaPtr(pPlayerPed->GetGtaVehicle()));
+	if (pVehicle)
+		pVehicle->SetMoveSpeedVector(vecMoveSpeed);
 }
 
 //----------------------------------------------------
@@ -1787,6 +1838,8 @@ void RegisterScriptRPCs(RakClientInterface* pRakClient)
 	REGISTER_STATIC_RPC(pRakClient, ScrSetPlayerVisibleInScoreBoard);
 	REGISTER_STATIC_RPC(pRakClient, ScrShowPlayerForPlayer);
 	REGISTER_STATIC_RPC(pRakClient, ScrShowVehicleForPlayer);
+	REGISTER_STATIC_RPC(pRakClient, ScrSetPlayerVelocity);
+	REGISTER_STATIC_RPC(pRakClient, ScrSetVehicleVelocity);
 }
 
 //----------------------------------------------------
@@ -1868,6 +1921,8 @@ void UnRegisterScriptRPCs(RakClientInterface* pRakClient)
 	UNREGISTER_STATIC_RPC(pRakClient, ScrSetPlayerVisibleInScoreBoard);
 	UNREGISTER_STATIC_RPC(pRakClient, ScrShowPlayerForPlayer);
 	UNREGISTER_STATIC_RPC(pRakClient, ScrShowVehicleForPlayer);
+	UNREGISTER_STATIC_RPC(pRakClient, ScrSetPlayerVelocity);
+	UNREGISTER_STATIC_RPC(pRakClient, ScrSetVehicleVelocity);
 }
 
 //----------------------------------------------------

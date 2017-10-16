@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <process.h>
+#include <map>
 
 #define ARRAY_SIZE(a)	( sizeof((a)) / sizeof(*(a)) )
 #define SAFE_DELETE(p)	{ if (p) { delete (p); (p) = NULL; } }

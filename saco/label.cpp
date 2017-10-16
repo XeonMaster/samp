@@ -9,6 +9,7 @@
 #endif
 
 extern D3DXMATRIX matView, matProj;
+extern CGame *pGame;
 
 CLabel::CLabel(IDirect3DDevice9* pDevice, char* szFontFace, bool bFontBold)
 {
@@ -39,6 +40,10 @@ void CLabel::Draw(D3DXVECTOR3* ppos, char* szText, DWORD dwColor)
 
 	D3DXVECTOR3 Out;
 	D3DXMATRIX matIdent;
+	IDirect3DDevice9 *pD3DDevice = (IDirect3DDevice9 *)pGame->GetD3DDevice();
+	pD3DDevice->GetTransform(D3DTS_VIEW, &matView);
+	pD3DDevice->GetTransform(D3DTS_PROJECTION, &matProj);
+
 	D3DXMatrixIdentity(&matIdent);
 	D3DXVec3Project(&Out, ppos, &Viewport, &matProj, &matView, &matIdent);
 

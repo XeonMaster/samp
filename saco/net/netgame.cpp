@@ -100,7 +100,7 @@ CNetGame::CNetGame(PCHAR szHostOrIp, int iPort,
 	m_bInstagib = FALSE;
 	m_iCheckLoadedStuff = 0;
 
-	if (pChatWindow) pChatWindow->AddDebugMessage("{FFFFFF}SA-MP {B9C9BF}0.2X {FFFFFF}Started");
+	if (pChatWindow) pChatWindow->AddDebugMessage("{FFFFFF}SA-MP {B9C9BF}" SAMP_VERSION " {FFFFFF}Started");
 
 }
 
@@ -296,12 +296,12 @@ void CNetGame::Process()
 	}
 	else {
 		if(pGame->FindPlayerPed()->IsInVehicle()) {
-			pGame->FindPlayerPed()->RemoveFromVehicleAndPutAt(1500.0f,-887.0979f,32.56055f);
+			pGame->FindPlayerPed()->RemoveFromVehicleAndPutAt(1093.4f, -2036.5f, 82.710602f);
 		} else {
-			pGame->FindPlayerPed()->TeleportTo(1500.0f,-887.0979f,32.56055f);
+			pGame->FindPlayerPed()->TeleportTo(1093.4f, -2036.5f, 82.710602f);
 		}
-		pGame->GetCamera()->SetPosition(1497.803f,-887.0979f,62.56055f,0.0f,0.0f,0.0f);
-		pGame->GetCamera()->LookAtPoint(1406.65f,-795.7716f,82.2771f,2);
+		pGame->GetCamera()->SetPosition(1093.0f, -2036.0f, 90.0f, 0.0f, 0.0f, 0.0f);
+		pGame->GetCamera()->LookAtPoint(384.0f, -1557.0f, 20.0f, 2);
 		pGame->DisplayHud(FALSE);
 	}
 
@@ -744,7 +744,7 @@ void CNetGame::Packet_ConnectionSucceeded(Packet *p)
 	uiChallenge ^= NETGAME_VERSION;
 
 	if(pChatWindow) {
-		pChatWindow->AddDebugMessage("Connection success. Loading network game...");
+		pChatWindow->AddDebugMessage("Connected. Joining the game...");
 	}
 
 	m_iGameState = GAMESTATE_AWAIT_JOIN;

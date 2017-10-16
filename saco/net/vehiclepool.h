@@ -11,19 +11,6 @@
 
 #define INVALID_VEHICLE_ID	0xFFFF
 
-#pragma pack(1)
-typedef struct _VEHICLE_SPAWN_INFO
-{
-	int iVehicleType;
-	VECTOR vecPos;
-	float fRotation;
-	int iColor1;
-	int iColor2;
-	int iObjective;
-	int iDoorsLocked;
-	int iInterior;
-} VEHICLE_SPAWN_INFO;
-
 //----------------------------------------------------
 
 #pragma pack(1)
@@ -31,17 +18,8 @@ class CVehiclePool
 {
 public:
 	
-	BOOL				m_bVehicleSlotState[MAX_VEHICLES];
-	CVehicle			*m_pVehicles[MAX_VEHICLES];
-	VEHICLE_TYPE		*m_pGTAVehicles[MAX_VEHICLES]; // pointers to actual ingame vehicles.
-
-	BOOL				m_bIsActive[MAX_VEHICLES];
-	BOOL				m_bIsWasted[MAX_VEHICLES];
-	VEHICLE_SPAWN_INFO	m_SpawnInfo[MAX_VEHICLES];
-	
-	int					m_iRespawnDelay[MAX_VEHICLES];
-	BYTE				m_byteVirtualWorld[MAX_VEHICLES];
-	CHAR				m_charNumberPlate[MAX_VEHICLES][9];
+	std::map<VEHICLEID, CVehicle*> m_pVehicles;
+	VEHICLEID m_VehiclePoolCount;
 
 	CVehiclePool();
 	~CVehiclePool();
@@ -56,14 +34,14 @@ public:
 	
 	// Retrieve a vehicle
 	CVehicle* GetAt(VEHICLEID VehicleID) {
-		if(VehicleID >= MAX_VEHICLES || !m_bVehicleSlotState[VehicleID]) { return NULL; }
+		if(m_VehiclePoolCount < VehicleID || m_pVehicles.find(VehicleID) == m_pVehicles.end()) { return NULL; }
 		return m_pVehicles[VehicleID];
 	};
 
 	// Find out if the slot is inuse.
 	BOOL GetSlotState(VEHICLEID VehicleID) {
-		if(VehicleID >= MAX_VEHICLES) { return FALSE; }
-		return m_bVehicleSlotState[VehicleID];
+		if(m_VehiclePoolCount < VehicleID || VehicleID > m_VehiclePoolCount) { return FALSE; }
+		return m_pVehicles.find(VehicleID) != m_pVehicles.end();
 	};
 
 	BOOL Spawn( VEHICLEID VehicleID, int iVehicleType,
@@ -81,13 +59,13 @@ public:
 	void AssignSpecialParamsToVehicle(VEHICLEID VehicleID, BYTE byteObjective, BYTE byteDoorsLocked);
 	
 	BYTE GetVehicleVirtualWorld(VEHICLEID VehicleID) {
-		if (VehicleID >= MAX_VEHICLES) { return 0; }
-		return m_byteVirtualWorld[VehicleID];		
+		if (VehicleID >= MAX_VEHICLES || m_pVehicles.find(VehicleID) == m_pVehicles.end()) { return 0; }
+		return m_pVehicles[VehicleID]->m_byteVirtualWorld;		
 	};
 	
 	void SetVehicleVirtualWorld(VEHICLEID VehicleID, BYTE byteVirtualWorld) {
-		if (VehicleID >= MAX_VEHICLES) return;
-		m_byteVirtualWorld[VehicleID] = byteVirtualWorld;
+		if (VehicleID >= MAX_VEHICLES || m_pVehicles.find(VehicleID) == m_pVehicles.end()) return;
+		m_pVehicles[VehicleID]->m_byteVirtualWorld = byteVirtualWorld;
 	};
 	
 	void SetForRespawn(VEHICLEID VehicleID, int iRespawnDelay = 1);
@@ -96,6 +74,8 @@ public:
 	VEHICLEID FindIDFromGtaPtr(VEHICLE_TYPE * pGtaVehicle);
 	int FindGtaIDFromID(int iID);
 	int FindGtaIDFromGtaPtr(VEHICLE_TYPE * pGtaVehicle);
+
+	VEHICLEID GetVehiclePoolCount() { return m_VehiclePoolCount; };
 };
 
 //----------------------------------------------------

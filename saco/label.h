@@ -6,6 +6,7 @@
 #ifndef LABEL_H
 #define LABEL_H
 
+#include "main.h"
 #include <d3d9.h>
 #include <d3dx9.h>
 

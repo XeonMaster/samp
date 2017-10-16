@@ -14,14 +14,11 @@
 
 class CVehiclePool
 {
-private:
-	
-	BOOL m_bVehicleSlotState[MAX_VEHICLES];
-	CVehicle *m_pVehicles[MAX_VEHICLES];
-	BYTE m_byteVirtualWorld[MAX_VEHICLES];
-	VEHICLEID		m_iVehiclePoolCount;
-
 public:
+	
+	VEHICLEID		m_iVehiclePoolCount;
+	std::map<VEHICLEID, CVehicle*> m_pVehicles;
+
 	CVehiclePool();
 	~CVehiclePool();
 
@@ -32,15 +29,15 @@ public:
 	// Retrieve a vehicle by id
 	CVehicle* GetAt(VEHICLEID VehicleID)
 	{
-		if(VehicleID >= MAX_VEHICLES) { return NULL; }
+		if(VehicleID > m_iVehiclePoolCount || m_pVehicles.find(VehicleID) == m_pVehicles.end()) { return NULL; }
 		return m_pVehicles[VehicleID];
 	};
 
 	// Find out if the slot is inuse.
 	BOOL GetSlotState(VEHICLEID VehicleID)
 	{
-		if(VehicleID > MAX_VEHICLES) { return FALSE; }
-		return m_bVehicleSlotState[VehicleID];
+		if(VehicleID > m_iVehiclePoolCount) { return FALSE; }
+		return m_pVehicles.find(VehicleID) != m_pVehicles.end();
 	};
 
 	void InitForPlayer(BYTE bytePlayerID);
@@ -50,8 +47,8 @@ public:
 	void SetVehicleVirtualWorld(VEHICLEID VehicleID, BYTE byteVirtualWorld);
 	
 	BYTE GetVehicleVirtualWorld(VEHICLEID VehicleID) {
-		if (VehicleID >= MAX_VEHICLES) { return 0; }
-		return m_byteVirtualWorld[VehicleID];		
+		if (VehicleID > m_iVehiclePoolCount) { return 0; }
+		return m_pVehicles[VehicleID]->GetVirtualWorld();
 	};
 
 	VEHICLEID GetVehiclePoolCount() {

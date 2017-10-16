@@ -17,20 +17,14 @@ extern CChatWindow *pChatWindow;
 
 CVehiclePool::CVehiclePool()
 {
-	// loop through and initialize all vehicle properties to 0
-	for(VEHICLEID VehicleID = 0; VehicleID < MAX_VEHICLES; VehicleID++) {
-		m_bVehicleSlotState[VehicleID] = FALSE;
-		m_pVehicles[VehicleID] = NULL;
-		m_pGTAVehicles[VehicleID] = NULL;
-		m_byteVirtualWorld[VehicleID] = 0;
-	}
+	m_VehiclePoolCount = 0;
 }
 
 //----------------------------------------------------
 
 CVehiclePool::~CVehiclePool()
 {
-	for(VEHICLEID VehicleID = 0; VehicleID < MAX_VEHICLES; VehicleID++) {
+	for(VEHICLEID VehicleID = 1; VehicleID < GetVehiclePoolCount(); VehicleID++) {
 		Delete(VehicleID);
 	}
 }
@@ -43,18 +37,6 @@ BOOL CVehiclePool::New( VEHICLEID VehicleID, int iVehicleType,
 					    VECTOR * vecSpawnPos, float fSpawnRotation, /*int iRespawnDelay,*/
 						int iInterior, PCHAR szNumberPlate, BOOL bShowMarker )
 {
-	memset(&m_SpawnInfo[VehicleID],0,sizeof(VEHICLE_SPAWN_INFO));
-
-	// Setup the spawninfo for the next respawn.
-	m_SpawnInfo[VehicleID].iVehicleType = iVehicleType;
-	m_SpawnInfo[VehicleID].vecPos.X = vecSpawnPos->X;
-	m_SpawnInfo[VehicleID].vecPos.Y = vecSpawnPos->Y;
-	m_SpawnInfo[VehicleID].vecPos.Z = vecSpawnPos->Z;
-	m_SpawnInfo[VehicleID].fRotation = fSpawnRotation;
-	m_SpawnInfo[VehicleID].iColor1 = iColor1;
-	m_SpawnInfo[VehicleID].iColor2 = iColor2;
-	
-	m_byteVirtualWorld[VehicleID] = 0;
 	
 	// Now go ahead and spawn it at the location we got passed.
 	return Spawn(VehicleID,iVehicleType,vecPos,fRotation,iColor1,iColor2,iInterior,szNumberPlate, 0, 0, bShowMarker);
@@ -69,10 +51,11 @@ BOOL CVehiclePool::Delete(VEHICLEID VehicleID)
 		return FALSE; // Vehicle already deleted or not used.
 	}
 
-	m_bVehicleSlotState[VehicleID] = FALSE;
 	delete m_pVehicles[VehicleID];
-	m_pVehicles[VehicleID] = NULL;
+	m_pVehicles.erase(VehicleID);
 
+	if (m_VehiclePoolCount > (--m_pVehicles.end())->first)
+		m_VehiclePoolCount = (--m_pVehicles.end())->first;
 	return TRUE;
 }
 
@@ -88,17 +71,29 @@ BOOL CVehiclePool::Spawn( VEHICLEID VehicleID, int iVehicleType,
 		Delete(VehicleID);
 	}
 
-	m_pVehicles[VehicleID] = pGame->NewVehicle(iVehicleType,
-		vecPos->X,vecPos->Y,vecPos->Z,fRotation, szNumberPlate, bShowMarker);
+	m_pVehicles[VehicleID] = pGame->NewVehicle(iVehicleType, vecPos->X, vecPos->Y, vecPos->Z,
+		fRotation, szNumberPlate, bShowMarker);
 
+	
 	if(m_pVehicles[VehicleID])
 	{	
+		m_pVehicles[VehicleID]->Remove();
+		memset(&m_pVehicles[VehicleID]->m_SpawnInfo, 0, sizeof(VEHICLE_SPAWN_INFO));
+
+		// Setup the spawninfo for the next respawn.
+		m_pVehicles[VehicleID]->m_SpawnInfo.iVehicleType = iVehicleType;
+		m_pVehicles[VehicleID]->m_SpawnInfo.vecPos.X = vecPos->X;
+		m_pVehicles[VehicleID]->m_SpawnInfo.vecPos.Y = vecPos->Y;
+		m_pVehicles[VehicleID]->m_SpawnInfo.vecPos.Z = vecPos->Z;
+		m_pVehicles[VehicleID]->m_SpawnInfo.fRotation = fRotation;
+		m_pVehicles[VehicleID]->m_SpawnInfo.iColor1 = iColor1;
+		m_pVehicles[VehicleID]->m_SpawnInfo.iColor2 = iColor2;
+
+		m_pVehicles[VehicleID]->m_byteVirtualWorld = 0;
+
 		if(iColor1 != -1 || iColor2 != -1) {
 			m_pVehicles[VehicleID]->SetColor(iColor1,iColor2);
 		}
-
-		m_pGTAVehicles[VehicleID] = m_pVehicles[VehicleID]->m_pVehicle;
-		m_bVehicleSlotState[VehicleID] = TRUE;
 
 		if(iObjective) m_pVehicles[VehicleID]->m_byteObjectiveVehicle = 1;
 		if(iDoorsLocked) m_pVehicles[VehicleID]->SetDoorState(1);
@@ -107,22 +102,26 @@ BOOL CVehiclePool::Spawn( VEHICLEID VehicleID, int iVehicleType,
 			LinkToInterior(VehicleID, iInterior);
 		}
 
-		m_bIsActive[VehicleID] = TRUE;
-		m_bIsWasted[VehicleID] = FALSE;
-		m_charNumberPlate[VehicleID][0] = 0;
-
+		
+		m_pVehicles[VehicleID]->m_bIsActive = TRUE;
+		m_pVehicles[VehicleID]->m_bIsWasted = FALSE;
+		m_pVehicles[VehicleID]->m_charNumberPlate[0] = 0;
+	
+		if (GetVehiclePoolCount() < VehicleID)
+			m_VehiclePoolCount = VehicleID;
 		return TRUE;
 	}
 	else
 	{
+		m_pVehicles.erase(VehicleID); // Failed to create, erase from the map!
 		return FALSE;
 	}
 }
 
 void CVehiclePool::LinkToInterior(VEHICLEID VehicleID, int iInterior)
 {
-	if(m_bVehicleSlotState[VehicleID]) {
-		m_SpawnInfo[VehicleID].iInterior = iInterior;
+	if(GetSlotState(VehicleID)) {
+		m_pVehicles[VehicleID]->m_SpawnInfo.iInterior = iInterior;
 		m_pVehicles[VehicleID]->LinkToInterior(iInterior);
 	}
 }
@@ -133,12 +132,12 @@ void CVehiclePool::AssignSpecialParamsToVehicle(VEHICLEID VehicleID, BYTE byteOb
 {
 	if(!GetSlotState(VehicleID)) return;
 
-	m_SpawnInfo[VehicleID].iObjective = byteObjective;
-	m_SpawnInfo[VehicleID].iDoorsLocked = byteDoorsLocked;
+	m_pVehicles[VehicleID]->m_SpawnInfo.iObjective = byteObjective;
+	m_pVehicles[VehicleID]->m_SpawnInfo.iDoorsLocked = byteDoorsLocked;
 	
 	CVehicle *pVehicle = m_pVehicles[VehicleID];
 
-	if(pVehicle && m_bIsActive[VehicleID]) {
+	if(pVehicle && m_pVehicles[VehicleID]->m_bIsActive) {
 		if (byteObjective)
 		{
 			pVehicle->m_byteObjectiveVehicle = 1;
@@ -154,8 +153,8 @@ VEHICLEID CVehiclePool::FindIDFromGtaPtr(VEHICLE_TYPE * pGtaVehicle)
 {
 	int x=1;
 	
-	while(x!=MAX_VEHICLES) {
-		if(pGtaVehicle == m_pGTAVehicles[x]) return x;
+	while(x <= GetVehiclePoolCount()) {
+		if(pGtaVehicle == m_pVehicles[x]->m_pVehicle) return x;
 		x++;
 	}
 
@@ -166,7 +165,7 @@ VEHICLEID CVehiclePool::FindIDFromGtaPtr(VEHICLE_TYPE * pGtaVehicle)
 
 int CVehiclePool::FindGtaIDFromID(int iID)
 {
-	return GamePool_Vehicle_GetIndex(m_pGTAVehicles[iID]);
+	return GamePool_Vehicle_GetIndex(m_pVehicles[iID]->m_pVehicle);
 }
 
 //----------------------------------------------------
@@ -180,7 +179,7 @@ int CVehiclePool::FindGtaIDFromGtaPtr(VEHICLE_TYPE * pGtaVehicle)
 
 void CVehiclePool::ProcessForVirtualWorld(VEHICLEID vehicleId, BYTE bytePlayerWorld)
 {
-	BYTE byteVehicleVW = m_byteVirtualWorld[vehicleId];
+	BYTE byteVehicleVW = m_pVehicles[vehicleId]->m_byteVirtualWorld;
 	if (bytePlayerWorld != byteVehicleVW)
 	{
 		if(m_pVehicles[vehicleId]->m_dwMarkerID)
@@ -206,34 +205,30 @@ void CVehiclePool::Process()
 	BYTE localVW = 0;
 	if (pLocalPlayer) localVW = pLocalPlayer->GetVirtualWorld();
 
-	for(VEHICLEID x = 0; x != MAX_VEHICLES; x++)
+	for(auto &i : m_pVehicles)
 	{
-		if(GetSlotState(x) == TRUE)
+		// It's in use.
+		int x = i.first;
+		pVehicle = m_pVehicles[x];
+
+		if(pVehicle->m_bIsActive)
 		{
-			// It's in use.
-			pVehicle = m_pVehicles[x];
+			
 
-			if(m_bIsActive[x])
+			if(pVehicle->IsDriverLocalPlayer()) {
+				pVehicle->SetInvulnerable(FALSE);
+			} else {
+				pVehicle->SetInvulnerable(TRUE);
+			}
+
+			if (pVehicle->GetHealth() == 0.0f) // || pVehicle->IsWrecked()) // It's dead
 			{
-				/*
-				if(!pVehicle->IsOccupied()) {
-					pVehicle->ProcessEngineAudio(0);
-				}*/
-
-				if(pVehicle->IsDriverLocalPlayer()) {
-					pVehicle->SetInvulnerable(FALSE);
-				} else {
-					pVehicle->SetInvulnerable(TRUE);
-				}
-
-				if (pVehicle->GetHealth() == 0.0f) // || pVehicle->IsWrecked()) // It's dead
+				if (pLocalPlayer->m_LastVehicle == x) // Notify server of death
 				{
-					if (pLocalPlayer->m_LastVehicle == x) // Notify server of death
-					{
-						NotifyVehicleDeath(x);
-					}
-					continue;
+					NotifyVehicleDeath(x);
 				}
+				continue;
+			}
 				
 				// Peter: This caused every vehicle outside the worldbounds
 				// that's not occupied to respawn every time this is called.
@@ -248,17 +243,17 @@ void CVehiclePool::Process()
 					}
 				}*/
 
-				if( pVehicle->GetVehicleSubtype() != VEHICLE_SUBTYPE_BOAT &&
-					pVehicle->HasSunk() ) // Not boat and has sunk.
-				{
-					if (pLocalPlayer->m_LastVehicle == x) {
-						NotifyVehicleDeath(x);
-					}
-					continue;
+			if( pVehicle->GetVehicleSubtype() != VEHICLE_SUBTYPE_BOAT &&
+				pVehicle->HasSunk() ) // Not boat and has sunk.
+			{
+				if (pLocalPlayer->m_LastVehicle == x) {
+					NotifyVehicleDeath(x);
 				}
+				continue;
+			}
 				
 				// Code to respawn vehicle after it has been idle for the amount of time specified
-				pVehicle->UpdateLastDrivenTime();
+			pVehicle->UpdateLastDrivenTime();
 
 				// Active and in world.
 
@@ -276,21 +271,21 @@ void CVehiclePool::Process()
 #endif */
 				// Remove or Add vehicles as they leave/enter a radius around the player
 				
-				if( pVehicle->IsAdded() ){
+			if( pVehicle->IsAdded() ){
 
-					pVehicle->Add();
-					
-					CVehicle* pTrailer = pVehicle->GetTrailer();
-					if (pTrailer && !pTrailer->IsAdded())
-					{
-						MATRIX4X4 matPos;
-						pVehicle->GetMatrix(&matPos);
-						pTrailer->TeleportTo(matPos.pos.X, matPos.pos.Y, matPos.pos.Z);
-						pTrailer->Add();
-					}
-				} 
+				pVehicle->Add();
+				
+				CVehicle* pTrailer = pVehicle->GetTrailer();
+				if (pTrailer && !pTrailer->IsAdded())
+				{
+					MATRIX4X4 matPos;
+					pVehicle->GetMatrix(&matPos);
+					pTrailer->TeleportTo(matPos.pos.X, matPos.pos.Y, matPos.pos.Z);
+					pTrailer->Add();
+				}
+			} 
 
-				pVehicle->ProcessMarkers(); // car scanning shit
+			pVehicle->ProcessMarkers(); // car scanning shit
 
 				/*
 				if( (pVehicle->GetVehicleSubtype() == VEHICLE_SUBTYPE_PLANE ||
@@ -299,37 +294,31 @@ void CVehiclePool::Process()
 					pVehicle->SetEngineState(FALSE);
 				}*/
 
-				if(!pVehicle->HasADriver()) {
-					pVehicle->SetHornState(0);
-					pVehicle->SetEngineState(FALSE);
-				}
+			if(!pVehicle->HasADriver()) {
+				pVehicle->SetHornState(0);
+				pVehicle->SetEngineState(FALSE);
+			}
 
-				// Update the actual ingame pointer if it's not
-				// the same as the one we have listed.
-				if(pVehicle->m_pVehicle != m_pGTAVehicles[x]) {
-					m_pGTAVehicles[x] = pVehicle->m_pVehicle;
-				}
 				// Put at the END so other processing is still done!
 				ProcessForVirtualWorld(x, localVW);
-			}
-			else // !m_bIsActive
-			{
-				if(!pVehicle->IsOccupied()) {
-					if(m_iRespawnDelay[x] > 0) {
-						m_iRespawnDelay[x]--;
-					}
-					else {
-#ifdef _DEBUG
-						CHAR szBuffer2[1024];
-						sprintf(szBuffer2, "Inactive vehicle getting respawned: %d\n", x);
-						OutputDebugString(szBuffer2);
-#endif
-						Spawn(x,m_SpawnInfo[x].iVehicleType,&m_SpawnInfo[x].vecPos, m_SpawnInfo[x].fRotation,
-							m_SpawnInfo[x].iColor1,m_SpawnInfo[x].iColor2,m_SpawnInfo[x].iInterior,m_charNumberPlate[x],m_SpawnInfo[x].iObjective,m_SpawnInfo[x].iDoorsLocked);
-					}
-				}	
-			}			
 		}
+		else // !m_bIsActive
+		{
+			if(!pVehicle->IsOccupied()) {
+				if(m_pVehicles[x]->m_iRespawnDelay > 0) {
+					m_pVehicles[x]->m_iRespawnDelay--;
+				}
+				else {
+#ifdef _DEBUG
+					CHAR szBuffer2[1024];
+					sprintf(szBuffer2, "Inactive vehicle getting respawned: %d\n", x);
+					OutputDebugString(szBuffer2);
+#endif
+					Spawn(x,m_pVehicles[x]->m_SpawnInfo.iVehicleType,&m_pVehicles[x]->m_SpawnInfo.vecPos, m_pVehicles[x]->m_SpawnInfo.fRotation,
+						m_pVehicles[x]->m_SpawnInfo.iColor1,m_pVehicles[x]->m_SpawnInfo.iColor2,m_pVehicles[x]->m_SpawnInfo.iInterior,m_pVehicles[x]->m_charNumberPlate,m_pVehicles[x]->m_SpawnInfo.iObjective,m_pVehicles[x]->m_SpawnInfo.iDoorsLocked);
+				}
+			}	
+		}			
 	} // end for each vehicle
 }
 
@@ -340,9 +329,9 @@ void CVehiclePool::SetForRespawn(VEHICLEID VehicleID, int iRespawnDelay)
 	CVehicle *pVehicle = m_pVehicles[VehicleID];
 
 	if(pVehicle) {
-		m_bIsActive[VehicleID] = FALSE;
-		m_bIsWasted[VehicleID] = TRUE;
-		m_iRespawnDelay[VehicleID] = iRespawnDelay;
+		m_pVehicles[VehicleID]->m_bIsActive = FALSE;
+		m_pVehicles[VehicleID]->m_bIsWasted = TRUE;
+		m_pVehicles[VehicleID]->m_iRespawnDelay = iRespawnDelay;
 	}
 }
 
@@ -364,9 +353,9 @@ int CVehiclePool::FindNearestToLocalPlayerPed()
 	float fThisDistance;
 	VEHICLEID ClosestSoFar=INVALID_VEHICLE_ID;
 
-	VEHICLEID x=0;
-	while(x < MAX_VEHICLES) {
-		if(GetSlotState(x) && m_bIsActive[x]) {
+	VEHICLEID x=1;
+	while(x <= GetVehiclePoolCount()) {
+		if(GetSlotState(x) && m_pVehicles[x]->m_bIsActive) {
 			fThisDistance = m_pVehicles[x]->GetDistanceFromLocalPlayerPed();
 			if(fThisDistance < fLeastDistance) {
 				fLeastDistance = fThisDistance;

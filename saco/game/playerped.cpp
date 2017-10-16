@@ -859,6 +859,7 @@ void CPlayerPed::PutDirectlyInVehicle(int iVehicleID, int iSeat)
             return;
 		}
 		ScriptCommand(&put_actor_in_car,m_dwGTAId,iVehicleID);
+		pVehicle->pDriver = m_pPed;
 	} else {
 		iSeat--;
 		ScriptCommand(&put_actor_in_car2,m_dwGTAId,iVehicleID,iSeat);
@@ -885,6 +886,8 @@ void CPlayerPed::EnterVehicle(int iVehicleID, BOOL bPassenger)
 	if(!GamePool_Vehicle_GetAt(iVehicleID)) return;
 	if(!GamePool_Ped_GetAt(m_dwGTAId)) return;
 
+
+	VEHICLE_TYPE * pVehicle = GamePool_Vehicle_GetAt(iVehicleID);
 	bIgnoreNextEntry = TRUE;
 
 	if(GetCurrentWeapon() == WEAPON_PARACHUTE) {
@@ -897,6 +900,7 @@ void CPlayerPed::EnterVehicle(int iVehicleID, BOOL bPassenger)
 	} else {
 		//pChatWindow->AddDebugMessage("Driver: %u 0x%X",m_bytePlayerNumber,iVehicleID);
 		ScriptCommand(&send_actor_to_car_driverseat,m_dwGTAId,iVehicleID,3000);
+		pVehicle->pDriver = m_pPed; // Stop pVehicle->pDriver from having a NULL pointer so the check to IsAPassenger() does not fail. (What is retarded by the way).
 	}				
 }
 
@@ -907,8 +911,15 @@ void CPlayerPed::ExitCurrentVehicle()
 {
 	if(!m_pPed) return;
 	if(!GamePool_Ped_GetAt(m_dwGTAId)) return;
+	
+	
 	if(IN_VEHICLE(m_pPed)) {
+		VEHICLE_TYPE *pVehicle = (VEHICLE_TYPE *)m_pPed->pVehicle;
+		if (pVehicle->pDriver == m_pPed)
+			pVehicle->pDriver = NULL; // Make sure the vehicle driver gets reset!
+
 		ScriptCommand(&make_actor_leave_car,m_dwGTAId,GetCurrentVehicleID());
+		
 	}
 }
 
@@ -919,6 +930,10 @@ void CPlayerPed::RemoveFromVehicleAndPutAt(float fX, float fY, float fZ)
 {
 	if(!GamePool_Ped_GetAt(m_dwGTAId)) return;
 	if(m_pPed && IN_VEHICLE(m_pPed)) {
+		VEHICLE_TYPE *pVehicle = (VEHICLE_TYPE *)m_pPed->pVehicle;
+		if (pVehicle->pDriver == m_pPed)
+			pVehicle->pDriver = NULL; // Make sure the vehicle driver gets reset!
+
 		ScriptCommand(&remove_actor_from_car_and_put_at,m_dwGTAId,fX,fY,fZ);
 	}
 }

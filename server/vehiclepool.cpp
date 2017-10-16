@@ -13,11 +13,6 @@
 
 CVehiclePool::CVehiclePool()
 {
-	// loop through and initialize all net players to null and slot states to false
-	for(VEHICLEID VehicleID = 0; VehicleID != MAX_VEHICLES; VehicleID++) {
-		m_bVehicleSlotState[VehicleID] = FALSE;
-		m_pVehicles[VehicleID] = NULL;
-	}
 	m_iVehiclePoolCount = 0;
 }
 
@@ -25,7 +20,7 @@ CVehiclePool::CVehiclePool()
 
 CVehiclePool::~CVehiclePool()
 {	
-	for(VEHICLEID VehicleID = 0; VehicleID != MAX_VEHICLES; VehicleID++) {
+	for(VEHICLEID VehicleID = 1; VehicleID <= m_iVehiclePoolCount; VehicleID++) {
 		Delete(VehicleID);
 	}
 }
@@ -38,20 +33,20 @@ VEHICLEID CVehiclePool::New(int iVehicleType,
 {
 	VEHICLEID VehicleID;
 
-	for(VehicleID=1; VehicleID != MAX_VEHICLES; VehicleID++)
+	for(VehicleID=1; VehicleID != m_pVehicles.max_size(); VehicleID++)
 	{
-		if(m_bVehicleSlotState[VehicleID] == FALSE) break;
+		if(m_pVehicles.find(VehicleID) == m_pVehicles.end()) break;
 	}
 
-	if(VehicleID == MAX_VEHICLES) return 0xFFFF;		
+	if (VehicleID >= 0xFFFF || iVehicleType < 400 || iVehicleType > 611)
+		return 0xFFFF;
 
-	m_pVehicles[VehicleID] = new CVehicle(iVehicleType,vecPos,fRotation,iColor1,iColor2,iRespawnDelay);
+	m_pVehicles.insert(std::make_pair(VehicleID, new CVehicle(iVehicleType,vecPos,fRotation,iColor1,iColor2,iRespawnDelay)));
 
 	if(m_pVehicles[VehicleID])
 	{
 		m_pVehicles[VehicleID]->SetID(VehicleID);
-		m_bVehicleSlotState[VehicleID] = TRUE;
-		m_byteVirtualWorld[VehicleID] = 0;
+		m_pVehicles[VehicleID]->m_byteVirtualWorld = 0;
 		if (VehicleID > m_iVehiclePoolCount)
 			m_iVehiclePoolCount = VehicleID;
 		return VehicleID;
@@ -71,16 +66,11 @@ BOOL CVehiclePool::Delete(VEHICLEID VehicleID)
 		return FALSE; // Vehicle already deleted or not used.
 	}
 
-	m_bVehicleSlotState[VehicleID] = FALSE;
 	delete m_pVehicles[VehicleID];
-	m_pVehicles[VehicleID] = NULL;
+	m_pVehicles.erase(VehicleID);
 
-	if (VehicleID == m_iVehiclePoolCount) {
-		for (VEHICLEID i = 0; i < MAX_VEHICLES; i++) {
-			if (GetSlotState(VehicleID) && VehicleID > m_iVehiclePoolCount)
-				m_iVehiclePoolCount = VehicleID;
-		}
-	}
+	if (VehicleID == m_iVehiclePoolCount && m_pVehicles.size() > 0)
+		m_iVehiclePoolCount = (--m_pVehicles.end())->first;
 	return TRUE;
 }
 
@@ -88,12 +78,9 @@ BOOL CVehiclePool::Delete(VEHICLEID VehicleID)
 
 void CVehiclePool::Process(float fElapsedTime)
 {
-	for (int i=0; i<MAX_VEHICLES; i++)
+	for(const auto &i : m_pVehicles)
 	{
-		if (GetSlotState(i) == TRUE)
-		{
-			GetAt(i)->Process(fElapsedTime);
-		}
+			i.second->Process(fElapsedTime);
 	}
 }
 
@@ -101,16 +88,8 @@ void CVehiclePool::Process(float fElapsedTime)
 
 void CVehiclePool::InitForPlayer(BYTE bytePlayerID)
 {	
-	// Spawn all existing vehicles for player.
-	CVehicle *pVehicle;
-	VEHICLEID x=0;
-
-	while(x!=MAX_VEHICLES) {
-		if(GetSlotState(x) == TRUE) {
-			pVehicle = GetAt(x);
-			if(pVehicle->IsActive()) pVehicle->SpawnForPlayer(bytePlayerID);
-		}
-		x++;
+	for(const auto &i : m_pVehicles) {
+		if(i.second->IsActive()) i.second->SpawnForPlayer(bytePlayerID);
 	}
 }
 
@@ -118,9 +97,9 @@ void CVehiclePool::InitForPlayer(BYTE bytePlayerID)
 
 void CVehiclePool::SetVehicleVirtualWorld(VEHICLEID VehicleID, BYTE byteVirtualWorld)
 {
-	if (VehicleID >= MAX_VEHICLES) return;
+	if (VehicleID > m_iVehiclePoolCount) return;
 	
-	m_byteVirtualWorld[VehicleID] = byteVirtualWorld;
+	m_pVehicles[VehicleID]->m_byteVirtualWorld = byteVirtualWorld;
 	// Tell existing players it's changed
 	RakNet::BitStream bsData;
 	bsData.Write(VehicleID); // player id

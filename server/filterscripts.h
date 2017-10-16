@@ -79,6 +79,7 @@ public:
 	int OnVehicleStreamIn(cell vehicleid, cell forplayerid);
 	int OnVehicleStreamOut(cell vehicleid, cell forplayerid);
 	int OnPlayerWeaponChanged(cell playerid, cell oldweaponid, cell newweaponid);
+	int OnRconLoginAttempt(char *ip, char *password, cell success, cell playerid = -1);
 	int OnPlayerUpdate(cell playerid);
 };
 

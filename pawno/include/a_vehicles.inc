@@ -53,6 +53,10 @@ native GetVehicleWeaponRotation(vehicleid, &Float:fX, &Float:fY);
 native IsVehicleStreamedInForPlayer(vehicleid, forplayerid);
 native GetVehiclePoolSize();
 
+// Vehicle Velocity
+native SetVehicleVelocity(vehicleid, Float:x, Float:y, Float:z);
+native GetVehicleVelocity(vehicleid, &Float:x, &Float:y, &Float:z);
+
 // Virtual Worlds
 native SetVehicleVirtualWorld(vehicleid, worldid);
 native GetVehicleVirtualWorld(vehicleid);

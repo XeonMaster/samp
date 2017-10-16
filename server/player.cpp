@@ -118,8 +118,6 @@ void CPlayer::UpdatePosition(float x, float y, float z)
 	m_vecPos.Y = y; 
 	m_vecPos.Z = z;
 
-	ProcessStreaming();
-
 	if (m_bCheckpointEnabled)
 	{
 		float fSX = (m_vecPos.X - m_vecCheckpoint.X) * (m_vecPos.X - m_vecCheckpoint.X);
@@ -179,6 +177,7 @@ void CPlayer::ProcessStreaming() {
 
 	float stream_distance = pConsole->GetFloatVariable("stream_distance");
 
+	// Will transfer BYTE to int eventually.
 	for (BYTE i = 0; i <= pNetGame->GetPlayerPool()->GetPlayerPoolCount(); i++) {
 		if (pNetGame->GetPlayerPool()->GetSlotState(i) && i != m_bytePlayerID) {
 			if (pNetGame->GetPlayerPool()->GetPlayerVirtualWorld(i) == pNetGame->GetPlayerPool()->GetPlayerVirtualWorld(m_bytePlayerID)) {
@@ -200,10 +199,11 @@ void CPlayer::ProcessStreaming() {
 		}
 	}
 
-	for (VEHICLEID i = 0; i <= pNetGame->GetVehiclePool()->GetVehiclePoolCount(); i++) {
-		if (pNetGame->GetVehiclePool()->GetSlotState(i)) {
-			if (pNetGame->GetVehiclePool()->GetVehicleVirtualWorld(i) == pNetGame->GetPlayerPool()->GetPlayerVirtualWorld(m_bytePlayerID)) { // Make sure its the same virtual world as the player!
-				CVehicle *pVehicle = pNetGame->GetVehiclePool()->GetAt(i);
+	for (auto &id : pNetGame->GetVehiclePool()->m_pVehicles) {
+		if (pNetGame->GetVehiclePool()->GetVehicleVirtualWorld(id.first) == pNetGame->GetPlayerPool()->GetPlayerVirtualWorld(m_bytePlayerID)) { // Make sure its the same virtual world as the player!
+			int i = id.first;
+			CVehicle *pVehicle = pNetGame->GetVehiclePool()->GetAt(i);
+			if (m_VehicleID != id.first) {
 				float distance = GetDistanceFromPoint(pVehicle->m_matWorld.pos);
 
 				if (distance <= stream_distance && !m_bStreamedVehicles[i]) { // Stream In
@@ -212,7 +212,7 @@ void CPlayer::ProcessStreaming() {
 					if (pGameMode) pGameMode->OnVehicleStreamIn(i, m_bytePlayerID);
 					if (pFilters) pFilters->OnVehicleStreamIn(i, m_bytePlayerID);
 				}
-				else if (distance > stream_distance && m_bStreamedVehicles[i] && m_VehicleID != i) { // Stream Out
+				else if (distance > stream_distance && m_bStreamedVehicles[i]) { // Stream Out
 					m_bStreamedVehicles[i] = FALSE;
 					ShowVehicle(i, false);
 					if (pGameMode) pGameMode->OnVehicleStreamOut(i, m_bytePlayerID);
@@ -290,7 +290,7 @@ void CPlayer::BroadcastSyncData()
 			bsSync.Write(false);
 		}
 
-		if (m_ofSync.byteCurrentWeapon == WEAPON_NIGHTVISION || m_ofSync.byteCurrentWeapon == WEAPON_THERMALVISION && m_ofSync.wKeys & KEY_FIRE) {
+		if ((m_ofSync.byteCurrentWeapon == WEAPON_NIGHTVISION || m_ofSync.byteCurrentWeapon == WEAPON_THERMALVISION) && m_ofSync.wKeys & KEY_FIRE) {
 			m_ofSync.wKeys &= ~(KEY_FIRE); // Remove KEY_FIRE so we don't get the vision bug!
 		}
 
@@ -602,6 +602,7 @@ void CPlayer::StoreOnFootFullSyncData(ONFOOT_SYNC_DATA *pofSync)
 
 	CheckKeyUpdatesForScript(m_ofSync.wKeys);
 	CheckWeaponUpdatesForScript(iOldWeaponID);
+	ProcessStreaming();
 	SetState(PLAYER_STATE_ONFOOT);
 
 	if(pFilterScripts && pGameMode) {
@@ -665,6 +666,7 @@ void CPlayer::StoreInCarFullSyncData(INCAR_SYNC_DATA *picSync)
 
 	CheckKeyUpdatesForScript(m_icSync.wKeys);
 	CheckWeaponUpdatesForScript(iOldWeaponID);
+	ProcessStreaming();
 	SetState(PLAYER_STATE_DRIVER);
 
 	if(pFilterScripts && pGameMode) {
@@ -720,6 +722,7 @@ void CPlayer::StorePassengerFullSyncData(PASSENGER_SYNC_DATA *ppsSync)
 
 	CheckKeyUpdatesForScript(m_psSync.wKeys);
 	CheckWeaponUpdatesForScript(iOldWeaponID);
+	ProcessStreaming();
 	SetState(PLAYER_STATE_PASSENGER);
 
 	if(pFilterScripts && pGameMode) {

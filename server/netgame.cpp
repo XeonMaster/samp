@@ -802,15 +802,11 @@ void CNetGame::BroadcastDataToStreamedPlayers(RakNet::BitStream *bitStream, Pack
 	char orderingStream,
 	BYTE byteExcludedPlayer) {
 
-	if (!GetPlayerPool()) return;
-
-	CPlayerPool *pPlayerPool = GetPlayerPool();
-
-	for (BYTE i = 0; i <= pPlayerPool->GetPlayerPoolCount(); i++) {
-		if (pPlayerPool->GetSlotState(i) && i != byteExcludedPlayer) {
-			CPlayer *pPlayer = pPlayerPool->GetAt(i);
+	for (BYTE i = 0; i <= pNetGame->GetPlayerPool()->GetPlayerPoolCount(); i++) {
+		if (pNetGame->GetPlayerPool()->GetSlotState(i) && i != byteExcludedPlayer) {
+			CPlayer *pPlayer = pNetGame->GetPlayerPool()->GetAt(i);
 			if (pPlayer->m_bStreamedPlayers[byteExcludedPlayer]) {
-				float fDist = pPlayer->GetDistanceFromPoint(pPlayerPool->GetAt(byteExcludedPlayer)->m_vecPos);
+				float fDist = pPlayer->GetDistanceFromPoint(pNetGame->GetPlayerPool()->GetAt(byteExcludedPlayer)->m_vecPos);
 				int send_rate = GetBroadcastSendRateFromPlayerDistance(fDist);
 				int r = 0;
 
@@ -1102,6 +1098,8 @@ void CNetGame::Packet_InGameRcon(Packet* packet)
 	CPlayer* pPlayer = GetPlayerPool()->GetAt((BYTE)packet->playerIndex);
 	if (pPlayer)
 	{
+		in_addr in;
+		in.s_addr = packet->playerId.binaryAddress;
 		DWORD dwCmdLen;
 		memcpy(&dwCmdLen, &packet->data[1], 4);
 		char* cmd = (char*)malloc(dwCmdLen+1);
@@ -1133,9 +1131,13 @@ void CNetGame::Packet_InGameRcon(Packet* packet)
 							GetPlayerPool()->SetAdmin((BYTE)packet->playerIndex);						
 							logprintf("RCON (In-Game): Player #%d (%s) has logged in.", packet->playerIndex, GetPlayerPool()->GetPlayerName((BYTE)packet->playerIndex));
 							SendClientMessage(packet->playerId, 0xFFFFFFFF,"SERVER: You are logged in as admin.");
+							GetFilterScripts()->OnRconLoginAttempt(inet_ntoa(in), szTemp, 1, (BYTE)packet->playerIndex);
+							GetGameMode()->OnRconLoginAttempt(inet_ntoa(in), szTemp, 1, (BYTE)packet->playerIndex);
 						} else {
 							logprintf("RCON (In-Game): Player #%d (%s) <%s> failed login.", packet->playerIndex, GetPlayerPool()->GetPlayerName((BYTE)packet->playerIndex), szTemp, pConsole->GetStringVariable("rcon_password"));
 							SendClientMessage(packet->playerId, 0xFFFFFFFF,"SERVER: Bad admin password. Repeated attempts will get you banned.");
+							GetFilterScripts()->OnRconLoginAttempt(inet_ntoa(in), szTemp, 0, (BYTE)packet->playerIndex);
+							GetGameMode()->OnRconLoginAttempt(inet_ntoa(in), szTemp, 0, (BYTE)packet->playerIndex);
 						}
 					}
 				}

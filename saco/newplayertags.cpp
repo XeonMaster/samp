@@ -83,6 +83,10 @@ void CNewPlayerTags::Draw(D3DXVECTOR3* pPlayerPos, char* pNameText, DWORD dwColo
 
 	D3DXVECTOR3 Out;
 	D3DXMATRIX matIdent;
+	IDirect3DDevice9 *pD3DDevice = (IDirect3DDevice9 *)pGame->GetD3DDevice();
+	pD3DDevice->GetTransform(D3DTS_VIEW, &matView); 
+	pD3DDevice->GetTransform(D3DTS_PROJECTION, &matProj); 
+
 	D3DXMatrixIdentity(&matIdent);
 	D3DXVec3Project(&Out, &TagPos, &Viewport, &matProj, &matView, &matIdent);
 

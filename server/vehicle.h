@@ -77,6 +77,7 @@ public:
 	DWORD					m_dwLastRespawnedTick;
 	BOOL					m_bShowMarker;
 	VECTOR2D				m_vTankRot;
+	BYTE					m_byteVirtualWorld;
 
 	void Process(float fElapsedTime);
 
@@ -99,6 +100,8 @@ public:
 	void Respawn();
 	BOOL IsOccupied();
 	bool IsATrainPart();
+
+	BYTE GetVirtualWorld() { return m_byteVirtualWorld; };
 
 	void Update(BYTE bytePlayerID, MATRIX4X4 * matWorld, float fHealth, VEHICLEID TrailerID);
 };

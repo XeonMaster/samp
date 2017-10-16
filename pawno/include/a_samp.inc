@@ -300,4 +300,5 @@ forward OnPlayerStreamOut(playerid, forplayerid);
 forward OnVehicleStreamIn(vehicleid, forplayerid);
 forward OnVehicleStreamOut(vehicleid, forplayerid);
 forward OnPlayerWeaponChanged(playerid, oldweaponid, newweaponid);
+forward OnRconLoginAttempt(ip[], password[], success, playerid = -1);
 forward OnPlayerUpdate(playerid); // called for every player network update. don't execute too much code in here. return 0 to prevent replication to other clients.

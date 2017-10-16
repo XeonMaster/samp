@@ -123,6 +123,8 @@
 	#define RPC_ScrSetPlayerVisibleInScoreBoard "a6"
 	#define RPC_ScrShowPlayerForPlayer		"a7"
 	#define RPC_ScrShowVehicleForPlayer		"a8"
+	#define RPC_ScrSetPlayerVelocity		"a9"
+	#define RPC_ScrSetVehicleVelocity		"a10"
 
 	// netrpc (server)
 	#define RPC_ClientJoin					"xx"

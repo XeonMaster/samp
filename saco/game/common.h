@@ -17,7 +17,7 @@
 //-----------------------------------------------------------
 
 #define MAX_PLAYERS		204
-#define MAX_VEHICLES	702
+#define MAX_VEHICLES	0xFFFF
 #define MAX_OBJECTS		255
 #define MAX_MENUS		128
 #define MAX_TEXT_DRAWS	1024

@@ -233,6 +233,7 @@ int main (int argc, char** argv)
 	bool bAllowQuery = true;
 	float stream_distance = 200.0f;
 	int iChatLogging = 1;
+	byteRconUser = INVALID_ID;
 
 	// Open the log file
 	LoadLogFile();
